@@ -7,6 +7,7 @@ class InventoryModule:
     def __init__(self, initial_cash=10000):
         self.cash = initial_cash
         self.cars = [] # List of Car IDs or names
+        self.damaged_cars = set() # Track vehicles needing repair
         self.parts = {} # {part_name: count}
         self.tools = [] # List of tools
 
@@ -30,6 +31,17 @@ class InventoryModule:
     def has_car(self, car_name):
         """Check for vehicle availability."""
         return car_name in self.cars
+
+    def set_damage(self, car_name, status=True):
+        """Mark a car as damaged or fixed."""
+        if status:
+            self.damaged_cars.add(car_name)
+        else:
+            self.damaged_cars.discard(car_name)
+
+    def is_damaged(self, car_name):
+        """Check if a car is currently damaged."""
+        return car_name in self.damaged_cars
 
     def add_parts(self, part_name, count=1):
         """Add spare parts to stock."""

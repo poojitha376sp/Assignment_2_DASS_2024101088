@@ -57,7 +57,7 @@ pytest blackbox/tests/
 3.  **Logical Bug Hunting**: Each test case was designed to trigger specific CFG branches. This revealed 7 critical logical errors (e.g., missing rent transfers, incorrect Go salary boundaries), which were fixed and committed individually.
 
 ### **Part 2: Integration Testing (StreetRace Manager)**
-1.  **Modular 8-Component Design**: I implemented 6 mandatory modules (Registration, Crew, Inventory, Race, Results, Missions) and 2 bonus modules (**Vehicle Tuning** and **Sponsorships**).
+1.  **Modular 9-Component Design**: I implemented 6 mandatory modules (Registration, Crew, Inventory, Race, Results, Missions) and 3 bonus modules (**Vehicle Tuning**, **Sponsorships**, and **Trophy Room**).
 2.  **Cross-Module Dependency Logic**: The system enforces strict business rules (e.g., race results automatically updating inventory cash, missions requiring specific crew roles).
 3.  **Integration Suite**: Created 7 test scenarios in Pytest that verify complex multi-module flows (e.g., winning a race triggers a sponsorship bonus and updates bank balance).
 

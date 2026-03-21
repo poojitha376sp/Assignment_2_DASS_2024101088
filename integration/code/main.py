@@ -11,6 +11,7 @@ from integration.code.results import ResultsModule
 from integration.code.missions import MissionModule
 from integration.code.tuning import TuningModule
 from integration.code.sponsors import SponsorModule
+from integration.code.trophy import TrophyModule
 
 class StreetRaceManager:
     def __init__(self):
@@ -19,8 +20,9 @@ class StreetRaceManager:
         self.crew = CrewModule(self.registration)
         self.inventory = InventoryModule()
         self.races = RaceModule(self.crew, self.inventory)
-        self.results = ResultsModule(self.inventory, self.races)
-        self.missions = MissionModule(self.crew)
+        self.trophy = TrophyModule()
+        self.results = ResultsModule(self.inventory, self.races, self.trophy)
+        self.missions = MissionModule(self.crew, self.inventory)
         self.tuning = TuningModule(self.crew, self.inventory)
         self.sponsors = SponsorModule(self.inventory)
 
