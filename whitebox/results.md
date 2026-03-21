@@ -149,6 +149,20 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 
 ---
 
+## Iteration 15: Grouped Refactoring (property.py and player.py)
+- **Target Files**: 
+  - `whitebox/code/moneypoly/property.py`
+  - `whitebox/code/moneypoly/player.py`
+- **Pylint Warnings**: 
+  - `R1705: Unnecessary "else" after "return"` (property.py)
+  - `W0612: Unused variable 'old_position'` (player.py)
+- **Justification**: These refactors improve code clarity and remove dead code. De-indenting logic after a return statement and removing unused assignments makes the codebase leaner and easier to maintain.
+- **Score Before**: 8.87/10 (Group average)
+- **Score After**: 9.14/10 (+0.27)
+- **Action**: Removed the `else` block in `property.py:get_rent()` and deleted the unused `old_position` assignment in `player.py:move()`. Also ensured both files have correct final newlines.
+
+---
+
 ## Iteration 14: Attribute Initialization in `dice.py`
 - **Target File**: `whitebox/code/moneypoly/dice.py`
 - **Pylint Warning**: `W0201: Attribute 'doubles_streak' defined outside __init__`
