@@ -174,105 +174,147 @@ For every one of the 240+ scenarios, the framework automatically validates:
 
 ### BUG-09: Cart Add Response Schema Mismatch
 - **Endpoint**: `POST /api/v1/cart/add`
-- **Expected Result**: Full cart state (`items`, `total`) returned.
-- **Actual Result**: Only a success message is returned.
+- **Payload**: `{"product_id": 1, "quantity": 1}`
+- **Expected Result**: Full cart state (`items`, `total`) returned in response.
+- **Actual Result**: Only `{"message": "Success"}` is returned.
 
 ### BUG-10: Admin Coupons Schema Mismatch
 - **Endpoint**: `GET /api/v1/admin/coupons`
-- **Expected Result**: List of coupons with their `code`.
-- **Actual Result**: `code` field is missing or incorrectly named.
+- **Expected Result**: List of coupons with their `code` field.
+- **Actual Result**: `code` field is missing, preventing coupon auditing.
 
 ### BUG-11: Data Validation Failure (Alphanumeric Pincode)
 - **Endpoint**: `POST /api/v1/addresses`
-- **Expected Result**: `400 Bad Request` for pincode `123A56`.
-- **Actual Result**: `200 OK` (Accepted non-digit characters).
+- **Payload**: `{"label": "HOME", ..., "pincode": "123A56"}`
+- **Expected Result**: `400 Bad Request` (digit-only validation).
+- **Actual Result**: `200 OK` (Accepted alphanumeric string).
 
 ### BUG-12: Ticket Immutability Violation
 - **Endpoint**: `PUT /api/v1/support/tickets/{id}`
-- **Expected Result**: `400 Bad Request` when trying to re-open a `CLOSED` ticket.
-- **Actual Result**: `200 OK` (Allowed state change from CLOSED back to OPEN).
+- **Payload**: `{"status": "OPEN"}` (applied to a CLOSED ticket)
+- **Expected Result**: `400 Bad Request` (closed tickets must be immutable).
+- **Actual Result**: `200 OK` (Ticket reopened against business rules).
 
 ### BUG-13: Persistent Data Validation Failure (Address Update)
 - **Endpoint**: `PUT /api/v1/addresses/{id}`
-- **Expected Result**: `400 Bad Request` for pincode `ABCDEF`.
-- **Actual Result**: `200 OK` (Accepted non-digit characters in UPDATE as well as CREATE).
+- **Payload**: `{"pincode": "ABCDEF"}`
+- **Expected Result**: `400 Bad Request`.
+- **Actual Result**: `200 OK` (Update logic lacks validation).
 
 ### BUG-14: Lack of Cancellation State Guard
 - **Endpoint**: `POST /api/v1/orders/{id}/cancel`
-- **Expected Result**: `400 Bad Request` when cancelling an already `CANCELLED` order.
+- **Expected Result**: `400 Bad Request` if status is already `CANCELLED`.
 - **Actual Result**: `200 OK` (Allows redundant cancellation operations).
 
 ### BUG-15: Critical Security Vulnerability (Broken Access Control)
 - **Endpoint**: `PUT /api/v1/support/tickets/{id}`
-- **Expected Result**: `403 Forbidden` when User A attempts to update User B's ticket.
-- **Actual Result**: `200 OK` (Bypass successful).
+- **Payload**: `{"status": "IN_PROGRESS"}` (sent by User A for User B's ticket)
+- **Expected Result**: `403 Forbidden`.
+- **Actual Result**: `200 OK` (User can update other users' tickets).
 
 ### BUG-16: API Crash on Review Average Calculation
-- **Endpoint**: `GET /api/v1/reviews/average`
-- **Expected Result**: Valid JSON response.
-- **Actual Result**: `500 Internal Server Error` (Crash when >1 review exists).
+- **Endpoint**: `GET /api/v1/reviews/average?product_id=1`
+- **Pre-condition**: Multiple reviews exist for a single product.
+- **Expected Result**: `200 OK` with JSON average.
+- **Actual Result**: `500 Internal Server Error`.
 
 ### BUG-17: Authentication Leak (Missing User Scoping)
 - **Endpoint**: `GET /api/v1/wallet/balance`
-- **Expected Result**: `400 Bad Request` if `X-User-ID` is missing.
-- **Actual Result**: `200 OK` (Leaks wallet balance anonymously).
+- **Headers**: Missing `X-User-ID`.
+- **Expected Result**: `400 Bad Request`.
+- **Actual Result**: `200 OK` (Leaks balance data anonymously).
 
 ### BUG-18: Critical Financial Logic Error (Total Zero)
 - **Endpoint**: `GET /api/v1/orders/{id}/invoice`
-- **Expected Result**: `total` must equal `subtotal + gst`.
-- **Actual Result**: `total` is returned as `0` regardless of subtotal.
+- **Expected Result**: `total` field must correctly sum products and GST.
+- **Actual Result**: `total` is consistently returned as `0`.
 
 ### BUG-19: GST Calculation Precision Error
 - **Endpoint**: `GET /api/v1/orders/{id}/invoice`
-- **Expected Result**: `gst` must be exactly 5% of subtotal.
+- **Expected Result**: `gst` must be exactly 5% of subtotal ($5 on $100).
 - **Actual Result**: `gst` is consistently returned as `0`.
 
 ### BUG-20: Data Type Validation Failure (Null Values)
 - **Endpoint**: `POST /api/v1/cart/add`
-- **Expected Result**: `400 Bad Request` when `quantity` is `null`.
+- **Payload**: `{"product_id": 1, "quantity": null}`
+- **Expected Result**: `400 Bad Request` (strict integer check).
 - **Actual Result**: `200 OK` (Accepted null quantity).
 
 ### BUG-21: Inactive Product Visibility Breach
 - **Endpoint**: `GET /api/v1/products/{id}`
-- **Expected Result**: `404 Not Found` for products marked as `active: False`.
-- **Actual Result**: `200 OK` (User can still fetch internal product details if they know the ID).
+- **ID**: [ID of a product where active=False]
+- **Expected Result**: `404 Not Found`.
+- **Actual Result**: `200 OK` (User can still fetch internal details via direct ID).
 
 ### BUG-22: Review Logic Violation (Unordered Products)
 - **Endpoint**: `POST /api/v1/reviews`
-- **Expected Result**: `400 Bad Request` if user has not ordered the product.
-- **Actual Result**: `200 OK` (Allows fake reviews for unordered products).
+- **Payload**: `{"product_id": 1, "rating": 5, "comment": "Nice!"}`
+- **Pre-condition**: User has NOT ordered product 1.
+- **Expected Result**: `400 Bad Request`.
+- **Actual Result**: `200 OK` (Allows fraudulent reviews).
 
 ### BUG-23: Review Logic Violation (Duplicate Reviews)
 - **Endpoint**: `POST /api/v1/reviews`
-- **Expected Result**: `400 Bad Request` for a second review of the same product.
+- **Payload**: User A reviews Product 1 for the second time.
+- **Expected Result**: `400 Bad Request`.
 - **Actual Result**: `200 OK` (Allows spamming multiple reviews per product).
 
 ### BUG-24: Financial Invariant Violation (Impossible Coupons)
 - **Endpoint**: `POST /api/v1/admin/coupons`
-- **Expected Result**: `400 Bad Request` for percentage discounts > 100%.
-- **Actual Result**: `200 OK`.
+- **Payload**: `{"code": "FREE", "discount_type": "PERCENTAGE", "discount_value": 110}`
+- **Expected Result**: `400 Bad Request`.
+- **Actual Result**: `200 OK` (Accepted >100% discount).
 
 ### BUG-25: Routing / Parsing Crash (Review Rating)
 - **Endpoint**: `POST /api/v1/reviews`
-- **Expected Result**: `400 Bad Request` for invalid rating strings like `--`.
-- **Actual Result**: `404 Not Found`.
+- **Payload**: `{"rating": "--", ...}`
+- **Expected Result**: `400 Bad Request`.
+- **Actual Result**: `404 Not Found` (Parser confuses data for a non-existent route).
 
 ### BUG-26: Business Logic Failure (Coupon Recycling)
 - **Endpoint**: `POST /api/v1/coupon/apply`
-- **Expected Result**: One-time coupons should be reusable if the order was cancelled.
-- **Actual Result**: `400 Bad Request` (Coupon marked as used permanently).
+- **Scenario**: Apply "one-time" coupon, then cancel the resulting order.
+- **Expected Result**: Coupon should be restored for reuse.
+- **Actual Result**: `400 Bad Request` (Permanently consumed).
 
 ### BUG-27: Admin Logic Failure (Negative Price)
 - **Endpoint**: `PUT /api/v1/admin/products/{id}`
-- **Expected Result**: `400 Bad Request` when setting price to -100.
-- **Actual Result**: `200 OK` (Accepted negative price).
+- **Payload**: `{"price": -100}`
+- **Expected Result**: `400 Bad Request`.
+- **Actual Result**: `200 OK`.
 
 ### BUG-28: Admin Logic Failure (Negative Stock)
 - **Endpoint**: `PUT /api/v1/admin/products/{id}`
-- **Expected Result**: `400 Bad Request` when setting stock to -10.
-- **Actual Result**: `200 OK` (Accepted negative stock).
+- **Payload**: `{"stock": -50}`
+- **Expected Result**: `400 Bad Request`.
+- **Actual Result**: `200 OK`.
 
 ### BUG-29: Critical Security Vulnerability (Privilege Escalation)
 - **Endpoint**: `GET /api/v1/admin/users`
-- **Expected Result**: `403 Forbidden` for regular users.
-- **Actual Result**: `200 OK` (Admin data leaked to all valid roll number holders).
+- **Headers**: Request sent by regular User ID (X-User-ID: 1).
+- **Expected Result**: `403 Forbidden` (or 401).
+- **Actual Result**: `200 OK` (Admin data leaked to regular users).
+
+---
+
+## 4. Test File Inventory
+The automated suite consists of 23 test modules totaling **177 high-level test functions**, covering over **240 logic scenarios** via parametrization.
+
+| Test File | Test Count | Prime Focus |
+| :--- | :--- | :--- |
+| `test_massive.py` | 108 | High-volume Input Fuzzing |
+| `test_deep_dive_1-9.py`| 34 | Complex Logic & State Machines |
+| `test_fuzzing.py` | 4 | Initial Type Safety & Guardrails |
+| `test_security.py` | 3 | Header Integrity & Authentication |
+| `test_addresses.py` | 3 | Label Enums & Pincode Logic |
+| `test_cart.py` | 3 | Basic Addition & Removal |
+| `test_checkout.py` | 3 | Payment Gateways & Thresholds |
+| `test_orders.py` | 3 | Cancellation & Invoicing |
+| `test_products.py` | 3 | Catalog Browsing & Sorting |
+| `test_profile.py` | 3 | Name/Phone Formatting Rules |
+| `test_reviews.py` | 3 | Feedback Integrity & Rating Math |
+| `test_wallet_loyalty.py` | 3 | Insufficient Funds & Redemption |
+| `test_admin.py` | 2 | Administrative Catalog Control |
+| `test_final_sec.py` | 2 | Privilege Escalation Probes |
+| `test_support.py` | 2 | Ticket Lifecycle & Transitions |
+| **Total** | **177** | **Exhaustive coverage** |
