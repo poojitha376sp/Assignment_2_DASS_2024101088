@@ -35,8 +35,10 @@ SPECIAL_TILES = {
 
 
 class Board:
-    """Represents the MoneyPoly game board and all its tiles."""
-
+    """
+    Manages the game board, including all property and non-property tiles.
+    Handles property lookups and board state inquiries.
+    """
     def __init__(self):
         self.groups = self._create_groups()
         self.properties = self._create_properties()

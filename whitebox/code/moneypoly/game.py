@@ -22,8 +22,10 @@ from moneypoly import ui
 
 
 class Game:
-    """Manages the full state and flow of a MoneyPoly game session."""
-
+    """
+    The main controller class for the MoneyPoly game engine.
+    Coordinates players, the board, the bank, and the dice.
+    """
     def __init__(self, player_names):
         self.board = Board()
         self.bank = Bank()

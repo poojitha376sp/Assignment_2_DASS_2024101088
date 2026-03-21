@@ -36,8 +36,10 @@ COMMUNITY_CHEST_CARDS = [
 
 
 class CardDeck:
-    """Represents an ordered deck of Chance or Community Chest cards."""
-
+    """
+    Represents a deck of Chance or Community Chest cards.
+    Handles drawing, shuffling, and recycling of cards.
+    """
     def __init__(self, cards):
         self.cards = list(cards)
         self.index = 0

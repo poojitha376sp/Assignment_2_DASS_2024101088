@@ -118,3 +118,16 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 8.24/10
 - **Score After**: 8.53/10 (+0.29)
 - **Action**: Added an architectural overview of the Bank class and its financial management role.
+
+---
+
+## Iteration 12: Final Class Docstrings Group (Board, CardDeck, Game)
+- **Target Files**: 
+  - `whitebox/code/moneypoly/board.py`
+  - `whitebox/code/moneypoly/cards.py`
+  - `whitebox/code/moneypoly/game.py`
+- **Pylint Warning**: `C0115: Missing class docstring`
+- **Justification**: As per the user's suggestion to group minor docstring fixes, I am adding class-level documentation to the remaining core classes. This ensures all primary objects in the MoneyPoly engine have defined responsibilities.
+- **Score Before**: 8.08/10 (Group average)
+- **Score After**: 8.08/10 (+0.00 net, but C0115 warnings resolved)
+- **Action**: Added concise class summaries explaining the roles of the Board, CardDeck, and Game controllers.
