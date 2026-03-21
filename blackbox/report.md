@@ -106,6 +106,14 @@ Testing system resilience against data-type violations and high-volume adversari
 
 The automated test suite was executed using Pytest and Requests against the live API at `http://localhost:8080`.
 
+### 2.1 Verification Logic
+For every one of the 240+ scenarios, the framework automatically validates:
+1.  **Status Codes**: Exact match against expected (e.g., 400 for structural, 403 for auth).
+2.  **JSON Structure**: Presence/format of mandatory fields (e.g., verifying `total` in cart).
+3.  **Data Correctness**: Numerical accuracy and business logic consistency.
+
+### 2.2 Execution Summary
+
 | Category | Tests | Passed | Failed | Success Rate |
 | :--- | :--- | :--- | :--- | :--- |
 | Security & Headers | 20 | 17 | 3 | 85% |
@@ -122,8 +130,9 @@ The automated test suite was executed using Pytest and Requests against the live
 
 ### BUG-01: Cart Quantity Validation Failure
 - **Endpoint**: `POST /api/v1/cart/add`
-- **Expected Result**: `400 Bad Request` for quantity 0.
-- **Actual Result**: `200 OK`.
+- **Payload**: `{"product_id": 1, "quantity": 0}`
+- **Expected Result**: `400 Bad Request` (min quantity 1).
+- **Actual Result**: `200 OK` (Accepted zero-item addition).
 
 ### BUG-02: Incorrect Status Code for Missing Product
 - **Endpoint**: `GET /api/v1/products/999999`
@@ -132,33 +141,36 @@ The automated test suite was executed using Pytest and Requests against the live
 
 ### BUG-03: Profile Update Schema Mismatch (Missing Name)
 - **Endpoint**: `PUT /api/v1/profile`
-- **Expected Result**: Response includes updated `name`.
-- **Actual Result**: `name` field is missing from the JSON response.
+- **Payload**: `{"name": "NewName", "phone": "1234567890"}`
+- **Expected Result**: Response JSON contains `name`.
+- **Actual Result**: `name` field is missing from response.
 
 ### BUG-04: Address Creation Schema Mismatch (Missing ID)
 - **Endpoint**: `POST /api/v1/addresses`
-- **Expected Result**: Response includes the newly assigned `address_id`.
-- **Actual Result**: `address_id` is missing, making it impossible to reference the address in later calls.
+- **Payload**: `{"label": "HOME", ...}`
+- **Expected Result**: Response JSON contains `address_id`.
+- **Actual Result**: `address_id` is missing.
 
 ### BUG-05: Illegal State Transition for Tickets
 - **Endpoint**: `PUT /api/v1/support/tickets/{id}`
-- **Expected Result**: `400 Bad Request` when skipping from `OPEN` to `CLOSED`.
-- **Actual Result**: `200 OK` (Allowed direct transition, violating one-way state rules).
+- **Payload**: `{"status": "CLOSED"}` (from OPEN)
+- **Expected Result**: `400 Bad Request` (must skip to IN_PROGRESS).
+- **Actual Result**: `200 OK`.
 
 ### BUG-06: Inconsistent Authentication Requirements
-- **Endpoint**: `GET /api/v1/products`
-- **Expected Result**: Constant header requirements regardless of query parameters.
-- **Actual Result**: Adding `?sort=price_asc` triggers a mandatory `X-User-ID` check that is not present on the base endpoint.
+- **Endpoint**: `GET /api/v1/products?sort=price_asc`
+- **Expected Result**: Public access (headers optional as per base route).
+- **Actual Result**: Requires `X-User-ID` only when sorting is applied.
 
 ### BUG-07: Admin Product Schema Mismatch (Missing Stock)
 - **Endpoint**: `GET /api/v1/admin/products`
-- **Expected Result**: Each product object includes a `stock` field.
-- **Actual Result**: `stock` field is missing, preventing inventory auditing.
+- **Expected Result**: Product objects include `stock` field.
+- **Actual Result**: `stock` field is missing.
 
 ### BUG-08: Invoice Schema Mismatch (Missing GST)
 - **Endpoint**: `GET /api/v1/orders/{id}/invoice`
-- **Expected Result**: Invoice shows the `gst` amount.
-- **Actual Result**: `gst` field is missing from the response.
+- **Expected Result**: Invoice JSON shows `gst` amount.
+- **Actual Result**: `gst` field is missing.
 
 ### BUG-09: Cart Add Response Schema Mismatch
 - **Endpoint**: `POST /api/v1/cart/add`
