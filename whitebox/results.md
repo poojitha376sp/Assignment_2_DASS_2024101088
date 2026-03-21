@@ -78,3 +78,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 9.29/10
 - **Score After**: 10.0/10 (+0.71)
 - **Action**: Added an overview of the global constants used throughout the MoneyPoly game.
+
+---
+
+## Iteration 8: Module Docstring in `game.py`
+- **Target File**: `whitebox/code/moneypoly/game.py`
+- **Pylint Warning**: `C0114: Missing module docstring`
+- **Justification**: Added a high-level description to `game.py`. This is the core controller of the entire MoneyPoly engine. A docstring here explains how it initializes the board and handles the main game loop and turn rotations.
+- **Score Before**: 8.70/10
+- **Score After**: 8.73/10 (+0.03)
+- **Action**: Summarized the Game class and its coordination of players, bank, and dice.

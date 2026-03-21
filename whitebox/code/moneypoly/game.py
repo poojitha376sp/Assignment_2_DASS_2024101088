@@ -1,3 +1,7 @@
+"""
+This module serves as the main controller for the MoneyPoly game. It manages 
+the game setup, player turn rotation, and the core game loop.
+"""
 import os
 
 from moneypoly.config import (
