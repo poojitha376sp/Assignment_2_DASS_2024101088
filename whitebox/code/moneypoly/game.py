@@ -289,19 +289,30 @@ class Game:
             self._move_and_resolve(player, roll)
             return
 
-        # No action
-        # Serve the turn
+        # No card/payment: Try to roll doubles to leave jail
+        roll = self.dice.roll()
+        print(f"  {player.name} rolled: {self.dice.describe()}")
+
+        if self.dice.is_doubles():
+            player.jail_info["in_jail"] = False
+            player.jail_info["turns"] = 0
+            print(f"  {player.name} rolled doubles and is released from jail!")
+            self._move_and_resolve(player, roll)
+            return
+
+        # No doubles, serve the turn or pay mandatory fine
         player.jail_info["turns"] += 1
         if player.jail_info["turns"] >= 3:
             # Mandatory release after 3 turns
-            print(f"  {player.name} must leave jail. Paying mandatory ${JAIL_FINE} fine.")
+            print(f"  {player.name} failed to roll doubles for 3 turns.")
+            print(f"  Paying mandatory ${JAIL_FINE} fine for release.")
             player.deduct_money(JAIL_FINE)
             self.resources["bank"].collect(JAIL_FINE)
             player.jail_info["in_jail"] = False
             player.jail_info["turns"] = 0
-            roll = self.dice.roll()
-            print(f"  {player.name} rolled: {self.dice.describe()}")
             self._move_and_resolve(player, roll)
+        else:
+            print(f"  No doubles rolled. {player.name} remains in jail.")
 
     def _apply_card(self, player, card):
         """Apply the effect of a drawn Chance or Community Chest card."""
