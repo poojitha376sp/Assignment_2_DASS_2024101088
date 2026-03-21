@@ -25,6 +25,7 @@ Validating constraints on user-submitted data.
 | **PROF-02** | `/api/v1/profile` | PUT | `{"name": "Tester", "phone": "123"}` | `400 Bad Request` | Verify phone length constraint (exactly 10 digits). |
 | **ADDR-01** | `/api/v1/addresses` | POST | `{"label": "VACATION", ...}` | `400 Bad Request` | Verify enum constraint (HOME, OFFICE, OTHER only). |
 | **ADDR-02** | `/api/v1/addresses` | POST | `{"pincode": "1234567"}` | `400 Bad Request` | Verify pincode length constraint (exactly 6 digits). |
+| **ADDR-03** | `/api/v1/addresses` | POST | Default swap logic | `is_default` handling | Verify only one address can be default at a time. |
 
 ### 1.3 Product Catalog
 Testing search, filter, and visibility rules.
@@ -33,6 +34,7 @@ Testing search, filter, and visibility rules.
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **PROD-01** | `/api/v1/products` | GET | None | List of active products only | Verify privacy/state filtering (inactive products hidden). |
 | **PROD-02** | `/api/v1/products/9999` | GET | ID: 9999 (Non-existent) | `404 Not Found` | Verify error handling for missing resources. |
+| **PROD-03** | `/api/v1/products` | GET | `sort=price_asc` | Sorted JSON array | Verify numerical sorting and header consistency. |
 
 ### 1.4 Cart & Checkout Logic
 Verifying transaction rules and financial correctness.
@@ -41,10 +43,12 @@ Verifying transaction rules and financial correctness.
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **CART-01** | `/api/v1/cart/add` | POST | `{"product_id": 1, "quantity": 0}` | `400 Bad Request` | Verify minimum quantity constraint. |
 | **CART-02** | `/api/v1/cart/add` | POST | `{"product_id": 1, "quantity": 1000}` | `400 Bad Request` | Verify inventory/stock check logic. |
+| **CART-03** | `/api/v1/cart/add` | POST | Add same item twice | Merged quantities | Verify quantity accumulation (not replacement). |
 | **COUP-01** | `/api/v1/coupon/apply` | POST | `{"code": "SAVE10"}` (Low Cart Value) | `400 Bad Request` | Verify minimum cart value constraint for coupons. |
+| **COUP-02** | `/api/v1/coupon/apply` | POST | Large cart value | Cap applied | Verify maximum discount cap enforcement. |
 | **CHCK-01** | `/api/v1/checkout` | POST | `{"payment_method": "BITCOIN"}` | `400 Bad Request` | Verify restricted payment methods (COD, WALLET, CARD only). |
 | **CHCK-02** | `/api/v1/checkout` | POST | `{"payment_method": "COD"}` (Order > 5000) | `400 Bad Request` | Verify COD upper limit constraint ($5000). |
-| **FIN-01** | `/api/v1/checkout` | POST | Valid Cart | `GST: 5%` calculation | Verify tax calculation accuracy. |
+| **FIN-01** | `/api/v1/checkout` | POST | Valid Cart | `GST: 5%` calculation | Verify tax calculation accuracy and precision. |
 
 ### 1.5 Wallet & Loyalty Points
 Testing balance management and point redemption.
