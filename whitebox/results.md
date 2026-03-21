@@ -178,6 +178,16 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 
 ---
 
+## Iteration 17: Line Length Cleanup in `cards.py`
+- **Target File**: `whitebox/code/moneypoly/cards.py`
+- **Pylint Warning**: `C0301: Line too long`
+- **Justification**: `cards.py` contains many hardcoded data strings that exceed the 100-character limit, resulting in a significantly low Pylint score. Wrapping these strings across multiple lines makes the data easier to read and brings the module into full compliance with PEP8 standards.
+- **Score Before**: 0.77/10
+- **Score After**: 10.00/10 (+9.23)
+- **Action**: Reformatted `CHANCE_CARDS` and `COMMUNITY_CHEST_CARDS` to ensure no line exceeds 100 characters.
+
+---
+
 ## Iteration 14: Attribute Initialization in `dice.py`
 - **Target File**: `whitebox/code/moneypoly/dice.py`
 - **Pylint Warning**: `W0201: Attribute 'doubles_streak' defined outside __init__`
