@@ -57,7 +57,7 @@ class Game:
             f"Turn {self.turn_info['count'] + 1}  |  {player.name}  |  ${player.balance}"
         )
 
-        if player.in_jail:
+        if player.jail_info["in_jail"]:
             self._handle_jail_turn(player)
             self.advance_turn()
             return
@@ -361,7 +361,24 @@ class Game:
 
 
     def _check_bankruptcy(self, player):
-        """Eliminate `player` from the game if they are bankrupt."""
+        """Allow `player` to raise funds or eliminate them if still bankrupt."""
+        while player.is_bankrupt():
+            # Check if they have ANY assets (properties not mortgaged)
+            mortgageable = [p for p in player.properties if not p.is_mortgaged]
+            if not mortgageable:
+                break # Truly bankrupt
+                
+            print(f"\n  !!! {player.name} is insolvent (Balance: ${player.balance}). !!!")
+            print("  You must mortgage properties to raise funds.")
+            print("    1. Mortgage a property")
+            print("    0. Declare Bankruptcy")
+            
+            choice = ui.safe_int_input("  Choice: ", default=0)
+            if choice == 1:
+                self._menu_mortgage(player)
+            else:
+                break
+                
         if player.is_bankrupt():
             print(f"\n  *** {player.name} is bankrupt and has been eliminated! ***")
             player.is_eliminated = True
