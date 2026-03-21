@@ -80,11 +80,11 @@ The automated test suite was executed using Pytest and Requests against the live
 | :--- | :--- | :--- | :--- | :--- |
 | Security & Headers | 3 | 3 | 0 | 100% |
 | Admin / Data | 2 | 2 | 0 | 100% |
-| Profile & Addresses| 8 | 4 | 4 | 50% |
+| Profile & Addresses| 9 | 4 | 5 | 44% |
 | Product Catalog | 4 | 2 | 2 | 50% |
-| Cart & Checkout | 11 | 8 | 3 | 72% |
+| Cart & Checkout | 14 | 10 | 4 | 71% |
 | Others (Wallet, etc)| 15| 12| 3 | 80% |
-| **Total** | **43** | **31** | **12** | **72%** |
+| **Total** | **47** | **33** | **14** | **70%** |
 
 ---
 
@@ -144,3 +144,13 @@ The automated test suite was executed using Pytest and Requests against the live
 - **Endpoint**: `PUT /api/v1/support/tickets/{id}`
 - **Expected Result**: `400 Bad Request` when trying to re-open a `CLOSED` ticket.
 - **Actual Result**: `200 OK` (Allowed state change from CLOSED back to OPEN).
+
+### BUG-13: Persistent Data Validation Failure (Address Update)
+- **Endpoint**: `PUT /api/v1/addresses/{id}`
+- **Expected Result**: `400 Bad Request` for pincode `ABCDEF`.
+- **Actual Result**: `200 OK` (Accepted non-digit characters in UPDATE as well as CREATE).
+
+### BUG-14: Lack of Cancellation State Guard
+- **Endpoint**: `POST /api/v1/orders/{id}/cancel`
+- **Expected Result**: `400 Bad Request` when cancelling an already `CANCELLED` order.
+- **Actual Result**: `200 OK` (Allows redundant cancellation operations).
