@@ -29,7 +29,6 @@ Validating constraints on user-submitted data.
 | **ADDR-03** | `/api/v1/addresses` | POST | Adding 2nd default address | Existing default is unset | Verify "only one default address" business logic. |
 | **ADDR-04** | `/api/v1/addresses` | POST | `{"pincode": "123A56"}` | `400 Bad Request` | Verify data type validation (digits only) on CREATE. |
 | **ADDR-05** | `/api/v1/addresses/{id}`| PUT | `{"pincode": "ABCDEF"}` | `400 Bad Request` | Verify data type validation (digits only) on UPDATE. |
-| **ADDR-03** | `/api/v1/addresses` | POST | Default swap logic | `is_default` handling | Verify only one address can be default at a time. |
 
 ### 1.3 Product Catalog
 Testing search, filter, and visibility rules.
@@ -40,7 +39,6 @@ Testing search, filter, and visibility rules.
 | **PROD-02** | `/api/v1/products/9999` | GET | ID: 9999 (Non-existent) | `404 Not Found` | Verify error handling for missing resources. |
 | **PROD-03** | `/api/v1/products` | GET | `sort=price_asc` | Sorted JSON list | Verify sorting logic and numerical accuracy. |
 | **PROD-04** | `/api/v1/products` | GET | `category=...&search=...` | Combined filter results | Verify multi-parameter query processing. |
-| **PROD-03** | `/api/v1/products` | GET | `sort=price_asc` | Sorted JSON array | Verify numerical sorting and header consistency. |
 
 ### 1.4 Cart & Checkout Logic
 Verifying transaction rules and financial correctness.
@@ -146,6 +144,11 @@ The automated test suite was executed using Pytest and Requests against the live
 - **Endpoint**: `POST /api/v1/cart/add`
 - **Expected Result**: Full cart state (`items`, `total`) returned.
 - **Actual Result**: Only a success message is returned.
+
+### BUG-10: Admin Coupons Schema Mismatch
+- **Endpoint**: `GET /api/v1/admin/coupons`
+- **Expected Result**: List of coupons with their `code`.
+- **Actual Result**: `code` field is missing or incorrectly named.
 
 ### BUG-11: Data Validation Failure (Alphanumeric Pincode)
 - **Endpoint**: `POST /api/v1/addresses`
