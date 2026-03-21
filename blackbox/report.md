@@ -99,13 +99,13 @@ The automated test suite was executed using Pytest and Requests against the live
 
 | Category | Tests | Passed | Failed | Success Rate |
 | :--- | :--- | :--- | :--- | :--- |
-| Security & Headers | 10 | 8 | 2 | 80% |
-| Admin / Data | 5 | 4 | 1 | 80% |
+| Security & Headers | 12 | 10 | 2 | 83% |
+| Admin / Data | 7 | 4 | 3 | 57% |
 | Profile & Addresses| 25 | 20 | 5 | 80% |
-| Product Catalog | 15 | 13 | 2 | 86% |
+| Product Catalog | 18 | 15 | 3 | 83% |
 | Cart & Checkout | 25 | 19 | 6 | 76% |
-| Others (Fuzzing, etc)| 25 | 21 | 4 | 84% |
-| **Total** | **105** | **85** | **20** | **81%** |
+| Others (Fuzzing/REV) | 30 | 25 | 5 | 83% |
+| **Total** | **117** | **93** | **24** | **79%** |
 
 ---
 
@@ -210,3 +210,23 @@ The automated test suite was executed using Pytest and Requests against the live
 - **Endpoint**: `POST /api/v1/cart/add`
 - **Expected Result**: `400 Bad Request` when `quantity` is `null`.
 - **Actual Result**: `200 OK` (Accepted null quantity).
+
+### BUG-21: Inactive Product Visibility Breach
+- **Endpoint**: `GET /api/v1/products/{id}`
+- **Expected Result**: `404 Not Found` for products marked as `active: False`.
+- **Actual Result**: `200 OK` (User can still fetch internal product details if they know the ID).
+
+### BUG-22: Review Logic Violation (Unordered Products)
+- **Endpoint**: `POST /api/v1/reviews`
+- **Expected Result**: `400 Bad Request` if user has not ordered the product.
+- **Actual Result**: `200 OK` (Allows fake reviews for unordered products).
+
+### BUG-23: Review Logic Violation (Duplicate Reviews)
+- **Endpoint**: `POST /api/v1/reviews`
+- **Expected Result**: `400 Bad Request` for a second review of the same product.
+- **Actual Result**: `200 OK` (Allows spamming multiple reviews per product).
+
+### BUG-24: Financial Invariant Violation (Impossible Coupons)
+- **Endpoint**: `POST /api/v1/admin/coupons`
+- **Expected Result**: `400 Bad Request` for percentage discounts > 100%.
+- **Actual Result**: `200 OK` (Allows creating >100% discount coupons).
