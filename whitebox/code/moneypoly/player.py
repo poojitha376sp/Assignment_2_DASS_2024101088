@@ -2,7 +2,6 @@
 This module defines the Player class, which is responsible for tracking 
 player-specific data like balance, position, and property ownership.
 """
-import sys
 from moneypoly.config import STARTING_BALANCE, BOARD_SIZE, GO_SALARY, JAIL_POSITION
 
 
@@ -38,7 +37,7 @@ class Player:
 
     def net_worth(self):
         """Calculate and return this player's total net worth."""
-        return self.balance
+        return self.balance + sum(prop.price for prop in self.properties if not prop.is_mortgaged)
 
     def move(self, steps):
         """

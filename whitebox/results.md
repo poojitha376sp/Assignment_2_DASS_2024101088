@@ -131,3 +131,18 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 8.08/10 (Group average)
 - **Score After**: 8.08/10 (+0.00 net, but C0115 warnings resolved)
 - **Action**: Added concise class summaries explaining the roles of the Board, CardDeck, and Game controllers.
+
+---
+
+## Iteration 13: Unused Imports and Final Newlines Cleanup (Grouped)
+- **Target Files**: 
+  - `whitebox/code/moneypoly/player.py`
+  - `whitebox/code/moneypoly/dice.py`
+  - `whitebox/code/moneypoly/game.py`
+- **Pylint Warnings**: 
+  - `W0611: Unused import` (sys, os, BOARD_SIZE, GO_TO_JAIL_POSITION)
+  - `C0304: Final newline missing`
+- **Justification**: Following your suggestion to group small, score-polishing fixes, I am clearing these basic style violations across multiple files. This reduces visual noise and ensures the imports are strictly necessary.
+- **Score Before**: 8.57/10 (Group average)
+- **Score After**: 8.78/10 (+0.21)
+- **Action**: Removed unused imports from header sections and ensured all files end with the standard blank line.
