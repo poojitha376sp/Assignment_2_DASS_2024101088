@@ -305,44 +305,40 @@ class Game:
         value = card["value"]
 
         if action == "collect":
-            amount = self.bank.pay_out(value)
-            player.add_money(amount)
-
+            player.add_money(self.bank.pay_out(value))
         elif action == "pay":
             player.deduct_money(value)
             self.bank.collect(value)
-
         elif action == "jail":
             player.go_to_jail()
             print(f"  {player.name} has been sent to Jail!")
-
         elif action == "jail_free":
             player.get_out_of_jail_cards += 1
             print(f"  {player.name} now holds a Get Out of Jail Free card.")
-
         elif action == "move_to":
-            old_pos = player.position
-            player.position = value
-            if value < old_pos:
-                player.add_money(GO_SALARY)
-                print(f"  {player.name} passed Go and collected ${GO_SALARY}.")
-            tile = self.board.get_tile_type(value)
-            if tile == "property":
-                prop = self.board.get_property_at(value)
-                if prop:
-                    self._handle_property_tile(player, prop)
+            self._handle_card_move_to(player, value)
+        elif action in ("birthday", "collect_from_all"):
+            self._handle_card_multi_collect(player, value)
 
-        elif action == "birthday":
-            for other in self.players:
-                if other != player and other.balance >= value:
-                    other.deduct_money(value)
-                    player.add_money(value)
+    def _handle_card_move_to(self, player, target):
+        """Move player to a specific tile via card effect."""
+        old_pos = player.position
+        player.position = target
+        if target < old_pos:
+            player.add_money(GO_SALARY)
+            print(f"  {player.name} passed Go and collected ${GO_SALARY}.")
+        tile = self.board.get_tile_type(target)
+        if tile == "property":
+            prop = self.board.get_property_at(target)
+            if prop:
+                self._handle_property_tile(player, prop)
 
-        elif action == "collect_from_all":
-            for other in self.players:
-                if other != player and other.balance >= value:
-                    other.deduct_money(value)
-                    player.add_money(value)
+    def _handle_card_multi_collect(self, player, amount):
+        """Collect money from all other players."""
+        for other in self.players:
+            if other != player and other.balance >= amount:
+                other.deduct_money(amount)
+                player.add_money(amount)
 
 
     def _check_bankruptcy(self, player):
@@ -454,7 +450,7 @@ class Game:
         for i, p in enumerate(others):
             print(f"  {i + 1}. {p.name}  (${p.balance})")
         idx = ui.safe_int_input("  Trade with: ", default=0) - 1
-        if not (0 <= idx < len(others)):
+        if not 0 <= idx < len(others):
             return
         partner = others[idx]
         if not player.properties:
@@ -463,7 +459,7 @@ class Game:
         for i, prop in enumerate(player.properties):
             print(f"  {i + 1}. {prop.name}")
         pidx = ui.safe_int_input("  Property to offer: ", default=0) - 1
-        if not (0 <= pidx < len(player.properties)):
+        if not 0 <= pidx < len(player.properties):
             return
         chosen_prop = player.properties[pidx]
         cash = ui.safe_int_input(

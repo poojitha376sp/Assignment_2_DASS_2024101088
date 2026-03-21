@@ -188,6 +188,16 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 
 ---
 
+## Iteration 18: Refactoring Complex Logic in `game.py`
+- **Target File**: `whitebox/code/moneypoly/game.py`
+- **Pylint Warning**: `R0912: Too many branches (15/12)`
+- **Justification**: The `_apply_card` method contains a large `if-elif` chain to handle different card actions. While functional, this high branch count makes the method harder to test and maintain. Extracting the logic into a more modular structure (like a dispatch table or smaller helpers) reduces complexity and satisfies Pylint's refactoring rules.
+- **Score Before**: 9.84/10 (Project Average)
+- **Score After**: 9.90/10 (Project Average) / 9.97/10 (Module)
+- **Action**: Extracted complex card actions into dedicated private methods. Also resolved unnecessary parentheses and ensured both files have correct final newlines.
+
+---
+
 ## Iteration 14: Attribute Initialization in `dice.py`
 - **Target File**: `whitebox/code/moneypoly/dice.py`
 - **Pylint Warning**: `W0201: Attribute 'doubles_streak' defined outside __init__`
