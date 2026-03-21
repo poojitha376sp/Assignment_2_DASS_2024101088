@@ -1,3 +1,7 @@
+"""
+This module contains global constants and configuration settings for the 
+MoneyPoly game, including board positions, starting funds, and tax amounts.
+"""
 STARTING_BALANCE = 1500
 GO_SALARY = 200
 BOARD_SIZE = 40

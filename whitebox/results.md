@@ -68,3 +68,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 0.38/10
 - **Score After**: 0.77/10 (+0.39)
 - **Action**: Added a summary of the CardDeck class and the contents of the card lists.
+
+---
+
+## Iteration 7: Module Docstring in `config.py`
+- **Target File**: `whitebox/code/moneypoly/config.py`
+- **Pylint Warning**: `C0114: Missing module docstring`
+- **Justification**: Added a high-level description to `config.py`. This module is the "brain" of the game's constants, so a docstring here identifies it as the central location for prices, indices, and rule limits.
+- **Score Before**: 9.29/10
+- **Score After**: 10.0/10 (+0.71)
+- **Action**: Added an overview of the global constants used throughout the MoneyPoly game.
