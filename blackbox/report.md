@@ -78,13 +78,13 @@ The automated test suite was executed using Pytest and Requests against the live
 
 | Category | Tests | Passed | Failed | Success Rate |
 | :--- | :--- | :--- | :--- | :--- |
-| Security & Headers | 3 | 3 | 0 | 100% |
+| Security & Headers | 4 | 3 | 1 | 75% |
 | Admin / Data | 2 | 2 | 0 | 100% |
 | Profile & Addresses| 9 | 4 | 5 | 44% |
 | Product Catalog | 4 | 2 | 2 | 50% |
-| Cart & Checkout | 14 | 10 | 4 | 71% |
-| Others (Wallet, etc)| 15| 12| 3 | 80% |
-| **Total** | **47** | **33** | **14** | **70%** |
+| Cart & Checkout | 15 | 11 | 4 | 73% |
+| Others (Wallet, etc)| 17| 13| 4 | 76% |
+| **Total** | **51** | **35** | **16** | **68%** |
 
 ---
 
@@ -154,3 +154,13 @@ The automated test suite was executed using Pytest and Requests against the live
 - **Endpoint**: `POST /api/v1/orders/{id}/cancel`
 - **Expected Result**: `400 Bad Request` when cancelling an already `CANCELLED` order.
 - **Actual Result**: `200 OK` (Allows redundant cancellation operations).
+
+### BUG-15: Critical Security Vulnerability (Broken Access Control)
+- **Endpoint**: `PUT /api/v1/support/tickets/{id}`
+- **Expected Result**: `403 Forbidden` when User A attempts to update User B's ticket.
+- **Actual Result**: `200 OK` (User A successfully updated someone else's ticket status).
+
+### BUG-16: API Crash on Review Average Calculation
+- **Endpoint**: `GET /api/v1/reviews/average`
+- **Expected Result**: Valid JSON response with the calculated average.
+- **Actual Result**: `500 Internal Server Error` (Returned non-JSON empty response when multiple reviews exist).
