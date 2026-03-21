@@ -1,4 +1,4 @@
-# DASS Assignment 2 - Software Testing (Poojitha - 2024101088)
+# DASS Assignment 2 - Software Testing (2024101088)
 
 Consolidated repository for White Box, Integration, and Black Box API testing.
 
@@ -67,4 +67,4 @@ pytest blackbox/tests/
 3.  **Automation Framework**: Built a modular Pytest suite using `requests`. Implemented shared fixtures in `conftest.py` to handle `X-Roll-Number` and `X-User-ID` headers centrally.
 
 ---
-**Author**: Poojitha J (2024101088)
+**Author**: 2024101088
