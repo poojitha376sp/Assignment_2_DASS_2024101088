@@ -30,9 +30,12 @@ class Property:
         """
         if self.is_mortgaged:
             return 0
+        rent = self.financials["rent"]
         if self.group is not None and self.group.all_owned_by(self.owner):
-            return self.financials["rent"] * self.FULL_GROUP_MULTIPLIER
-        return self.financials["rent"]
+            rent *= self.FULL_GROUP_MULTIPLIER
+        # Add house bonus (assuming simple flat increase for this engine)
+        rent += self.houses * 50 # Using 50 from config (hardcoded for now to match atomicity)
+        return rent
 
     def mortgage(self):
         """

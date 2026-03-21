@@ -464,6 +464,27 @@ class Game:
         if 0 <= idx < len(mortgageable):
             self.mortgage_property(player, mortgageable[idx])
 
+    def _menu_build(self, player):
+        """Interactively select a monopoly property to build a house on."""
+        # Filter for properties where player owns the full group
+        buildable = [p for p in player.properties if p.group.all_owned_by(player)]
+        if not buildable:
+            print("  You must own a full color group before building houses.")
+            return
+
+        for i, prop in enumerate(buildable):
+            print(f"  {i + 1}. {prop.name} ({prop.houses} houses, Cost: $100)")
+
+        idx = ui.safe_int_input("  Select property: ", default=0) - 1
+        if 0 <= idx < len(buildable):
+            prop = buildable[idx]
+            if player.balance < 100:
+                print("  Insufficient funds to build.")
+                return
+            player.deduct_money(100)
+            prop.houses += 1
+            print(f"  Successfully built house on {prop.name}. Total: {prop.houses}")
+
     def _menu_unmortgage(self, player):
         """Interactively select a mortgaged property to redeem."""
         mortgaged = [p for p in player.properties if p.is_mortgaged]
