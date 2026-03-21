@@ -88,3 +88,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 8.70/10
 - **Score After**: 8.73/10 (+0.03)
 - **Action**: Summarized the Game class and its coordination of players, bank, and dice.
+
+---
+
+## Iteration 9: Module Docstring in `ui.py`
+- **Target File**: `whitebox/code/moneypoly/ui.py`
+- **Pylint Warning**: `C0114: Missing module docstring`
+- **Justification**: Added a high-level description to `ui.py`. This module handles all player-to-game communications, including display formatting and input loops. Documentation here explains the interaction layer of the MoneyPoly engine.
+- **Score Before**: 9.55/10
+- **Score After**: 9.77/10 (+0.22)
+- **Action**: Summarized the UI class and its role in presenting the board state and collecting player decisions.

@@ -1,3 +1,7 @@
+"""
+This module handles the user interface for MoneyPoly, including formatting the 
+board display, printing game events, and collecting player input.
+"""
 def print_banner(title):
     """Print a decorated section header."""
     width = 52
