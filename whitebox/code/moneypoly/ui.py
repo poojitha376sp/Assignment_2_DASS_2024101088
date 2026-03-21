@@ -1,7 +1,8 @@
 """
-This module handles the user interface for MoneyPoly, including formatting the 
+This module handles the user interface for MoneyPoly, including formatting the
 board display, printing game events, and collecting player input.
 """
+
 def print_banner(title):
     """Print a decorated section header."""
     width = 52
@@ -10,16 +11,16 @@ def print_banner(title):
     print("=" * width)
 
 
-def print_player_card(player):
-    """Print a detailed status card for a single player."""
-    jail_line = f"  Status  : IN JAIL (turn {player.jail_turns}/3)\n" if player.in_jail else ""
-    print(f"\n  Player  : {player.name}")
+def print_player_status(player):
+    """Print the financial and location status of a single player."""
+    jail_status = player.jail_info["in_jail"]
+    jail_turns = player.jail_info["turns"]
+    jail_line = f"  Status  : IN JAIL (turn {jail_turns}/3)\n" if jail_status else ""
+    jail_tag = " [JAILED]" if jail_status else ""
+
+    print(f"\n  Player  : {player.name}{jail_tag}")
     print(f"  Balance : ${player.balance:,}")
-    print(f"  Worth   : ${player.net_worth():,}")
-    print(f"  Position: {player.position}")
     print(jail_line, end="")
-    if player.get_out_of_jail_cards:
-        print(f"  Jail cards: {player.get_out_of_jail_cards}")
     if player.properties:
         print("  Properties:")
         for prop in player.properties:
@@ -34,7 +35,7 @@ def print_standings(players):
     print("\n  [ Standings ]")
     ranked = sorted(players, key=lambda p: p.net_worth(), reverse=True)
     for i, player in enumerate(ranked, start=1):
-        jail_tag = " [JAILED]" if player.in_jail else ""
+        jail_tag = " [JAILED]" if player.jail_info["in_jail"] else ""
         print(
             f"  {i}. {player.name:<16} "
             f"${player.balance:>6,}  "
@@ -77,3 +78,8 @@ def safe_int_input(prompt, default=0):
 def confirm(prompt):
     """Prompt the user for a yes/no answer. Returns True for 'y'."""
     return input(prompt).strip().lower() == "y"
+
+
+def print_player_card(player):
+    """Legacy wrapper for print_player_status."""
+    print_player_status(player)
