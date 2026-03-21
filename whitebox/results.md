@@ -108,3 +108,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 9.15/10
 - **Score After**: 9.32/10 (+0.17)
 - **Action**: Added a technical summary of how PropertyGroup tracks membership and color consistency.
+
+---
+
+## Iteration 11: Class Docstring in `bank.py` (Bank)
+- **Target File**: `whitebox/code/moneypoly/bank.py`
+- **Pylint Warning**: `C0115: Missing class docstring`
+- **Justification**: Added a class-level docstring to `Bank`. This class serves as the central ledger for the game's economy. Documenting its purpose clarifies the relationship between global funds and individual player loans.
+- **Score Before**: 8.24/10
+- **Score After**: 8.53/10 (+0.29)
+- **Action**: Added an architectural overview of the Bank class and its financial management role.

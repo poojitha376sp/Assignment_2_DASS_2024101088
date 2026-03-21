@@ -7,6 +7,10 @@ from moneypoly.config import BANK_STARTING_FUNDS
 
 
 class Bank:
+    """
+    Represents the central bank in MoneyPoly. It manages global funds,
+    tracks issued loans, and collects taxes and fees.
+    """
     def __init__(self):
         self._funds = BANK_STARTING_FUNDS
         self._loans_issued = []
