@@ -163,6 +163,21 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 
 ---
 
+## Iteration 16: Logic and Exception Handling Cleanup (game.py and ui.py)
+- **Target Files**: 
+  - `whitebox/code/moneypoly/game.py`
+  - `whitebox/code/moneypoly/ui.py`
+- **Pylint Warnings**: 
+  - `R1723: Unnecessary "elif" after "break"` (game.py)
+  - `W1309: Using an f-string that does not have any interpolated variables` (game.py)
+  - `W0702: No exception type(s) specified` (ui.py)
+- **Justification**: These fixes address logical branch clarity and defensive programming. De-indenting after a break reduces nesting complexity, removing redundant f-string markers saves overhead, and specifying exception types (Exception) prevents accidental catching of system signals like Ctrl+C.
+- **Score Before**: 8.89/10 (Group average)
+- **Score After**: 8.97/10 (+0.08)
+- **Action**: Corrected the branch logic in `game.py`, removed the empty f-marker, and updated the bare `except` in `ui.py` to `except ValueError`.
+
+---
+
 ## Iteration 14: Attribute Initialization in `dice.py`
 - **Target File**: `whitebox/code/moneypoly/dice.py`
 - **Pylint Warning**: `W0201: Attribute 'doubles_streak' defined outside __init__`
