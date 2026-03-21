@@ -279,6 +279,7 @@ class Game:
 
         # Offer to pay the fine voluntarily
         if ui.confirm(f"  Pay ${JAIL_FINE} fine to leave jail? (y/n): "):
+            player.deduct_money(JAIL_FINE)
             self.resources["bank"].collect(JAIL_FINE)
             player.jail_info["in_jail"] = False
             player.jail_info["turns"] = 0

@@ -198,19 +198,38 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 
 ---
 
-## Iteration 19: Architectural Refactor for Attribute/Argument Limits
-- **Target Files**: 
-  - `whitebox/code/moneypoly/player.py`
-  - `whitebox/code/moneypoly/property.py`
-  - `whitebox/code/moneypoly/game.py`
-- **Pylint Warnings**: 
-  - `R0902: Too many instance attributes` (Multiple files)
-  - `R0913: Too many arguments` (property.py)
-- **Justification**: To achieve a perfect Pylint score, we must strictly adhere to architectural limits. By grouping related attributes (e.g., jail status, financial details, or card decks) into internal dictionaries or namespaces, we reduce the top-level attribute count. This demonstrates advanced object-oriented design and deep compliance with code quality tools.
-- **Score After**: 10.00/10 (Project Average)
-- **Action**: Grouped internal class state into dictionaries and namespaces across `player.py`, `property.py`, and `game.py`. This resolved all remaining `R0902` (attributes) and `R0913` (arguments) warnings. Updated every cross-file reference to maintain identical game logic.
+## Part 1.3: White Box Test Cases
+This section documents the white-box test suite designed to cover all branches, key variable states, and edge cases of the MoneyPoly game engine.
 
----
+### Test Case Design & Justification
+| ID | Branch/Feature | Justification | Results |
+| :--- | :--- | :--- | :--- |
+| **TC-01** | Movement (Pass Go) | Verify salary is credited when passing position 0. | **FAILED** (Found Bug #2) |
+| **TC-02** | Jail (Pay Fine) | Verify player is released after paying $50. | **FAILED** (Found Bug #1) |
+| **TC-03** | Jail (Doubles Roll) | Verify release via luck (Node 11). | **FAILED** (Found Bug #3) |
+| **TC-04** | Jail (3rd Turn Forced) | Verify forced release after 3 turns (Node 12). | **PASSED** (Logic present) |
+
+### Errors & Logical Issues Found
+#### **Error #1: Voluntary Jail Fine - Missing Player Deduction**
+- **File**: `whitebox/code/moneypoly/game.py`
+- **Location**: `_handle_jail_turn` method (approx. lines 281-282).
+- **Issue**: When a player chooses to pay the $50 fine to leave jail voluntarily, the game calls `self.resources["bank"].collect(JAIL_FINE)` but fails to call `player.deduct_money(JAIL_FINE)`.
+- **Impact**: Incorrect game economy; money is created out of thin air.
+- **Fix**: Add `player.deduct_money(JAIL_FINE)` to the voluntary payment branch.
+
+#### **Error #2: Pass Go Salary - Incorrect Boundary Check**
+- **File**: `whitebox/code/moneypoly/player.py`
+- **Location**: `move` method (line 55).
+- **Issue**: The check `if self.position == 0` only awards the $200 salary if the player lands **exactly** on the Go square. It fails to award salary if the player **passes** Go (e.g., moving from 38 to 1).
+- **Impact**: Players lose their salary most turns they circle the board, significantly breaking game progression.
+- **Fix**: Change the logic to check if the new position is less than the old position (indicating a wrap-around) and ensure the landing case is still covered.
+
+#### **Error #3: Jail Mechanics - Missing Doubles Roll Escape**
+- **File**: `whitebox/code/moneypoly/game.py`
+- **Location**: `_handle_jail_turn` method.
+- **Issue**: The classic Monopoly rule where a player can escape jail by rolling doubles is completely unimplemented. The code currently only allows escape via cards or payment.
+- **Impact**: Game rules violation; players are forced to wait or pay even if they roll doubles.
+- **Fix**: Implement a dice roll check in the jail turn logic if the player declines to pay the fine.
 
 ## Iteration 14: Attribute Initialization in `dice.py`
 - **Target File**: `whitebox/code/moneypoly/dice.py`
