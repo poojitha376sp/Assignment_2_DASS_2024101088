@@ -50,11 +50,14 @@ class Player:
         Awards the Go salary if the player passes or lands on Go.
         Returns the new board position.
         """
+        old_position = self.position
         self.position = (self.position + steps) % BOARD_SIZE
 
-        if self.position == 0:
+        # If current position is less than old position, we have wrapped around (passed Go)
+        # Exception: Landing exactly on 0 is also passing Go.
+        if self.position < old_position or (self.position == 0 and steps > 0):
             self.add_money(GO_SALARY)
-            print(f"  {self.name} landed on Go and collected ${GO_SALARY}.")
+            print(f"  {self.name} passed Go and collected ${GO_SALARY}.")
 
         return self.position
 
