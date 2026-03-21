@@ -88,13 +88,13 @@ The automated test suite was executed using Pytest and Requests against the live
 
 | Category | Tests | Passed | Failed | Success Rate |
 | :--- | :--- | :--- | :--- | :--- |
-| Security & Headers | 4 | 3 | 1 | 75% |
-| Admin / Data | 2 | 2 | 0 | 100% |
-| Profile & Addresses| 9 | 4 | 5 | 44% |
-| Product Catalog | 4 | 2 | 2 | 50% |
-| Cart & Checkout | 15 | 11 | 4 | 73% |
-| Others (Wallet, etc)| 17| 13| 4 | 76% |
-| **Total** | **51** | **35** | **16** | **68%** |
+| Security & Headers | 10 | 8 | 2 | 80% |
+| Admin / Data | 5 | 4 | 1 | 80% |
+| Profile & Addresses| 25 | 20 | 5 | 80% |
+| Product Catalog | 15 | 13 | 2 | 86% |
+| Cart & Checkout | 25 | 19 | 6 | 76% |
+| Others (Fuzzing, etc)| 25 | 21 | 4 | 84% |
+| **Total** | **105** | **85** | **20** | **81%** |
 
 ---
 
