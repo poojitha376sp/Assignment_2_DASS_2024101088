@@ -98,6 +98,8 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-08** | Rent: Standard | Single lot rent payment | **PASSED** |
 | **TC-09** | Rent: Monopoly | 2x Rent for full group | **PASSED** (Fixed) |
 | **TC-11** | Bankruptcy: Recovery | Mortgage to save from insolvency | **PASSED** (Fixed) |
+| **TC-12** | Movement: GTJ Tile | Forced jail on landing at Pos 30 | **PASSED** |
+| **TC-13** | Movement: Speeding | Forced jail on 3rd consecutive double | **PASSED** |
 | **TC-14** | Bankruptcy: Elimination | Game removal on total failure | **PASSED** |
 | **TC-15** | **Super Workflow** | **Nodes 48-52 (Houses/Monopoly)**| **PASSED** |
 | **TC-16** | Special: Luxury Tax | Node 18b (Position 38) | **PASSED** |
@@ -125,4 +127,4 @@ Added `_check_bankruptcy` rescue loop allowing mortgages.
 Implemented `_menu_build` and Choice 7 in `interactive_menu`. 
 
 ---
-**Status**: Part 1.1 - 1.3 are 100% complete.
+
