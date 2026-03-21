@@ -15,6 +15,7 @@ Every request must include `X-Roll-Number`. User-scoped endpoints also require `
 | **SEC-02** | `/api/v1/admin/users` | GET | `X-Roll-Number`: "ABC" | `400 Bad Request` | Verify data type validation for headers (integer required). |
 | **SEC-03** | `/api/v1/profile` | GET | Missing `X-User-ID` | `400 Bad Request` | Verify user scoping for personal data. |
 | **SEC-04** | `/api/v1/profile` | GET | `X-User-ID`: -5 | `400 Bad Request` | Verify boundary validation (must be positive integer). |
+| **SEC-05** | `/api/v1/support/tickets/{id}`| PUT | User A updates User B ticket| `403 Forbidden` | Verify multi-user access control and data privacy. |
 
 ### 1.2 Profile & Address Management
 Validating constraints on user-submitted data.
@@ -25,6 +26,9 @@ Validating constraints on user-submitted data.
 | **PROF-02** | `/api/v1/profile` | PUT | `{"name": "Tester", "phone": "123"}` | `400 Bad Request` | Verify phone length constraint (exactly 10 digits). |
 | **ADDR-01** | `/api/v1/addresses` | POST | `{"label": "VACATION", ...}` | `400 Bad Request` | Verify enum constraint (HOME, OFFICE, OTHER only). |
 | **ADDR-02** | `/api/v1/addresses` | POST | `{"pincode": "1234567"}` | `400 Bad Request` | Verify pincode length constraint (exactly 6 digits). |
+| **ADDR-03** | `/api/v1/addresses` | POST | Adding 2nd default address | Existing default is unset | Verify "only one default address" business logic. |
+| **ADDR-04** | `/api/v1/addresses` | POST | `{"pincode": "123A56"}` | `400 Bad Request` | Verify data type validation (digits only) on CREATE. |
+| **ADDR-05** | `/api/v1/addresses/{id}`| PUT | `{"pincode": "ABCDEF"}` | `400 Bad Request` | Verify data type validation (digits only) on UPDATE. |
 | **ADDR-03** | `/api/v1/addresses` | POST | Default swap logic | `is_default` handling | Verify only one address can be default at a time. |
 
 ### 1.3 Product Catalog
@@ -34,6 +38,8 @@ Testing search, filter, and visibility rules.
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **PROD-01** | `/api/v1/products` | GET | None | List of active products only | Verify privacy/state filtering (inactive products hidden). |
 | **PROD-02** | `/api/v1/products/9999` | GET | ID: 9999 (Non-existent) | `404 Not Found` | Verify error handling for missing resources. |
+| **PROD-03** | `/api/v1/products` | GET | `sort=price_asc` | Sorted JSON list | Verify sorting logic and numerical accuracy. |
+| **PROD-04** | `/api/v1/products` | GET | `category=...&search=...` | Combined filter results | Verify multi-parameter query processing. |
 | **PROD-03** | `/api/v1/products` | GET | `sort=price_asc` | Sorted JSON array | Verify numerical sorting and header consistency. |
 
 ### 1.4 Cart & Checkout Logic
@@ -58,6 +64,8 @@ Testing balance management and point redemption.
 | **WALL-01** | `/api/v1/wallet/pay` | POST | `{"amount": 999999}` | `400 Bad Request` | Verify insufficient balance handling. |
 | **WALL-02** | `/api/v1/wallet/add` | POST | `{"amount": -10}` | `400 Bad Request` | Verify positive amount constraint for top-ups. |
 | **LOY-01** | `/api/v1/loyalty/redeem`| POST | `{"points": 1}` (Zero balance) | `400 Bad Request` | Verify redemption eligibility checks. |
+| **LOY-02** | `/api/v1/loyalty/redeem`| POST | `{"points": 0}` | `400 Bad Request` | Verify minimum redemption limit (at least 1 point). |
+| **WALL-03** | `/api/v1/wallet/add` | POST | `{"amount": 100001}` | `400 Bad Request` | Verify maximum top-up boundary ($100,000). |
 
 ### 1.6 Orders & Support Tickets
 Testing life-cycle transitions and invariant checks.
@@ -65,8 +73,12 @@ Testing life-cycle transitions and invariant checks.
 | ID | Endpoint | Method | Input (Context) | Expected Output | Justification |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **ORD-01** | `/api/v1/orders/{id}/cancel`| POST| Cancel "Delivered" order | `400 Bad Request` | Verify order state immutability after delivery. |
+| **ORD-02** | `/api/v1/orders/{id}/cancel`| POST| Cancel "Cancelled" order | `400 Bad Request` | Verify state machine idempotency/strictness. |
+| **ORD-03** | `/api/v1/orders/999/invoice`| GET | Request missing invoice | `404 Not Found` | Verify consistency of resource discovery errors. |
 | **SUPP-01** | `/api/v1/support/ticket` | POST | `{"subject": "Hi", ...}` | `400 Bad Request` | Verify subject length constraint (min 5 chars). |
 | **SUPP-02** | `/api/v1/support/tickets/{id}`| PUT | `status: OPEN -> CLOSED` | `400 Bad Request`| Verify status transition (must go through IN_PROGRESS). |
+| **SUPP-03** | `/api/v1/support/tickets/{id}`| PUT | `subject: "New Sub" (CLOSED)` | `400 Bad Request`| Verify field immutability for final-state tickets. |
+| **REV-04** | `/api/v1/reviews/average` | GET | Multiple ratings (5 and 4) | `average_rating: 4.5` | Verify mathematical calculation accuracy. |
 
 ---
 
