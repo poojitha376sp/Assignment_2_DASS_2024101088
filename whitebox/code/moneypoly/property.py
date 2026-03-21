@@ -66,6 +66,10 @@ class Property:
 
 
 class PropertyGroup:
+    """
+    Represents a color-coded group of properties. This class tracks all
+    member properties to check for ownership of the full set.
+    """
     def __init__(self, name, color):
         self.name = name
         self.color = color

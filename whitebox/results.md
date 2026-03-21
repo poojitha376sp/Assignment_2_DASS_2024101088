@@ -98,3 +98,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 9.55/10
 - **Score After**: 9.77/10 (+0.22)
 - **Action**: Summarized the UI class and its role in presenting the board state and collecting player decisions.
+
+---
+
+## Iteration 10: Class Docstring in `property.py` (PropertyGroup)
+- **Target File**: `whitebox/code/moneypoly/property.py`
+- **Pylint Warning**: `C0115: Missing class docstring`
+- **Justification**: Added a class-level docstring to `PropertyGroup`. This class is responsible for logical groupings of properties (like color sets), so documenting its purpose is important for understanding the rent-calculation hierarchy.
+- **Score Before**: 9.15/10
+- **Score After**: 9.32/10 (+0.17)
+- **Action**: Added a technical summary of how PropertyGroup tracks membership and color consistency.
