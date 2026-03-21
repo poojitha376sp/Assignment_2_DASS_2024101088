@@ -78,6 +78,17 @@ Testing life-cycle transitions and invariant checks.
 | **SUPP-03** | `/api/v1/support/tickets/{id}`| PUT | `subject: "New Sub" (CLOSED)` | `400 Bad Request`| Verify field immutability for final-state tickets. |
 | **REV-04** | `/api/v1/reviews/average` | GET | Multiple ratings (5 and 4) | `average_rating: 4.5` | Verify mathematical calculation accuracy. |
 
+### 1.7 Fuzzing & Advanced Stress
+Testing system resilience against data-type violations and extreme fuzzing (60+ scenarios).
+
+| ID | Endpoint | Method | Input Variation | Expected Output | Justification |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **FUZZ-01** | `/api/v1/products` | GET | SQL Injection, XSS, etc | `200/400` (No 500) | Verify sanitization of query parameters. |
+| **FUZZ-02** | `/api/v1/cart/add` | POST | `quantity: null/float/str` | `400 Bad Request` | Verify strict type validation for quantities. |
+| **FUZZ-03** | `/api/v1/profile` | PUT | String Overflow (>1000 chars)| `400 Bad Request` | Verify buffer/length constraints on inputs. |
+| **FUZZ-04** | `/api/v1/addresses` | POST | `pincode: True/None/Object` | `400 Bad Request` | Verify strict type validation for pincodes. |
+| **SEC-06** | `/api/v1/wallet/balance`| GET | Request WITHOUT User ID | `400 Bad Request` | Verify identification requirements for private data. |
+
 ---
 
 ---
@@ -173,9 +184,29 @@ The automated test suite was executed using Pytest and Requests against the live
 ### BUG-15: Critical Security Vulnerability (Broken Access Control)
 - **Endpoint**: `PUT /api/v1/support/tickets/{id}`
 - **Expected Result**: `403 Forbidden` when User A attempts to update User B's ticket.
-- **Actual Result**: `200 OK` (User A successfully updated someone else's ticket status).
+- **Actual Result**: `200 OK` (Bypass successful).
 
 ### BUG-16: API Crash on Review Average Calculation
 - **Endpoint**: `GET /api/v1/reviews/average`
-- **Expected Result**: Valid JSON response with the calculated average.
-- **Actual Result**: `500 Internal Server Error` (Returned non-JSON empty response when multiple reviews exist).
+- **Expected Result**: Valid JSON response.
+- **Actual Result**: `500 Internal Server Error` (Crash when >1 review exists).
+
+### BUG-17: Authentication Leak (Missing User Scoping)
+- **Endpoint**: `GET /api/v1/wallet/balance`
+- **Expected Result**: `400 Bad Request` if `X-User-ID` is missing.
+- **Actual Result**: `200 OK` (Leaks wallet balance anonymously).
+
+### BUG-18: Critical Financial Logic Error (Total Zero)
+- **Endpoint**: `GET /api/v1/orders/{id}/invoice`
+- **Expected Result**: `total` must equal `subtotal + gst`.
+- **Actual Result**: `total` is returned as `0` regardless of subtotal.
+
+### BUG-19: GST Calculation Precision Error
+- **Endpoint**: `GET /api/v1/orders/{id}/invoice`
+- **Expected Result**: `gst` must be exactly 5% of subtotal.
+- **Actual Result**: `gst` is consistently returned as `0`.
+
+### BUG-20: Data Type Validation Failure (Null Values)
+- **Endpoint**: `POST /api/v1/cart/add`
+- **Expected Result**: `400 Bad Request` when `quantity` is `null`.
+- **Actual Result**: `200 OK` (Accepted null quantity).
