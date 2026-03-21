@@ -1,3 +1,7 @@
+"""
+This module contains the definitions for Chance and Community Chest cards,
+as well as the CardDeck class for managing drawing and reshuffling.
+"""
 import random
 
 CHANCE_CARDS = [

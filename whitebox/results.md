@@ -58,3 +58,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 7.71/10
 - **Score After**: 8.24/10 (+0.53)
 - **Action**: Added a summary of the Bank class and its role in the MoneyPoly economy. I also took the opportunity to remove an unused math import.
+
+---
+
+## Iteration 6: Module Docstring in `cards.py`
+- **Target File**: `whitebox/code/moneypoly/cards.py`
+- **Pylint Warning**: `C0114: Missing module docstring`
+- **Justification**: Added a high-level description to `cards.py`. This module handles the logic for drawing Chance and Community Chest cards, so a docstring is useful for explaining how deck cycling works.
+- **Score Before**: 0.38/10
+- **Score After**: 0.77/10 (+0.39)
+- **Action**: Added a summary of the CardDeck class and the contents of the card lists.
