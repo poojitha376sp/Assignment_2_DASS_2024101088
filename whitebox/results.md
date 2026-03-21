@@ -18,3 +18,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 7.92/10
 - **Score After**: 8.12/10 (+0.20)
 - **Action**: Added a concise, IIITH student-style summary of the module's role in managing player state.
+
+---
+
+## Iteration 2: Module Docstring in `property.py`
+- **Target File**: `whitebox/code/moneypoly/property.py`
+- **Pylint Warning**: `C0114: Missing module docstring`
+- **Description**: Added a high-level description to the `property.py` module. This details the data models for both individual properties and color groups.
+- **Score Before**: 8.98/10
+- **Score After**: 9.15/10 (+0.17)
+- **Action**: Documented the module's responsibility for board tile entities and group arithmetic.

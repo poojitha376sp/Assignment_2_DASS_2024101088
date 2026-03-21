@@ -1,3 +1,7 @@
+"""
+This module handles the Property and PropertyGroup classes, governing how 
+tiles are owned and how rent is calculated across different groups.
+"""
 class Property:
     """Represents a single purchasable property tile on the MoneyPoly board."""
 
