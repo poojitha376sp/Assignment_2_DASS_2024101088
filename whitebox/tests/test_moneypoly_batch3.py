@@ -25,17 +25,12 @@ def test_tc08_rent_standard(clean_game):
     prop.owner = alice
     alice.properties.append(prop)
     
-    print(f"\n[DEBUG] Alice ID: {id(alice)}, Prop Owner ID: {id(prop.owner)}")
-    print(f"[DEBUG] Bob ID: {id(bob)}")
-    
     # Bob lands on it
     initial_bob_balance = bob.balance
     initial_alice_balance = alice.balance
     rent = prop.get_rent() # Should be 2 for Med Ave
     
     clean_game._handle_property_tile(bob, prop)
-    print(f"[DEBUG] Alice balance after: {alice.balance}")
-    print(f"[DEBUG] Prop owner balance after: {prop.owner.balance}")
     
     assert bob.balance == initial_bob_balance - rent
     assert alice.balance == initial_alice_balance + rent
