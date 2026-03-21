@@ -76,11 +76,11 @@ The automated test suite was executed using Pytest and Requests against the live
 | :--- | :--- | :--- | :--- | :--- |
 | Security & Headers | 3 | 3 | 0 | 100% |
 | Admin / Data | 2 | 2 | 0 | 100% |
-| Profile & Addresses| 6 | 5 | 1 | 83% |
-| Product Catalog | 3 | 2 | 1 | 66% |
-| Cart & Checkout | 6 | 4 | 2 | 66% |
-| Others (Wallet, etc)| 11| 11| 0 | 100% |
-| **Total** | **31** | **27** | **4** | **87%** |
+| Profile & Addresses| 7 | 4 | 3 | 57% |
+| Product Catalog | 4 | 2 | 2 | 50% |
+| Cart & Checkout | 10 | 7 | 3 | 70% |
+| Others (Wallet, etc)| 14| 12| 2 | 85% |
+| **Total** | **40** | **30** | **10** | **75%** |
 
 ---
 
@@ -88,35 +88,50 @@ The automated test suite was executed using Pytest and Requests against the live
 
 ### BUG-01: Cart Quantity Validation Failure
 - **Endpoint**: `POST /api/v1/cart/add`
-- **Request Payload**: 
-  - **Method**: POST
-  - **URL**: `http://localhost:8080/api/v1/cart/add`
-  - **Body**: `{"product_id": 1, "quantity": 0}`
-- **Expected Result**: `400 Bad Request` (Spec: "Sending 0 or a negative number must be rejected with a 400 error.")
-- **Actual Result**: `200 OK` (Item added with 0 quantity).
+- **Expected Result**: `400 Bad Request` for quantity 0.
+- **Actual Result**: `200 OK`.
 
 ### BUG-02: Incorrect Status Code for Missing Product
-- **Endpoint**: `GET /api/v1/products/{product_id}`
-- **Request Payload**: 
-  - **Method**: GET
-  - **URL**: `http://localhost:8080/api/v1/products/999999`
-- **Expected Result**: `404 Not Found` (Spec: "returns a 404 error if the product does not exist.")
+- **Endpoint**: `GET /api/v1/products/999999`
+- **Expected Result**: `404 Not Found`.
 - **Actual Result**: `400 Bad Request`.
 
-### BUG-03: Profile Update Schema Mismatch
+### BUG-03: Profile Update Schema Mismatch (Missing Name)
 - **Endpoint**: `PUT /api/v1/profile`
-- **Request Payload**: 
-  - **Method**: PUT
-  - **URL**: `http://localhost:8080/api/v1/profile`
-  - **Body**: `{"name": "New Name", "phone": "1234567890"}`
-- **Expected Result**: JSON response containing the updated profile including `name`.
-- **Actual Result**: `{"phone": "1234567890", "message": "Profile updated successfully"}` (Missing `name` field).
+- **Expected Result**: Response includes updated `name`.
+- **Actual Result**: `name` field is missing from the JSON response.
 
-### BUG-04: Cart Add Response Schema Mismatch
+### BUG-04: Address Creation Schema Mismatch (Missing ID)
+- **Endpoint**: `POST /api/v1/addresses`
+- **Expected Result**: Response includes the newly assigned `address_id`.
+- **Actual Result**: `address_id` is missing, making it impossible to reference the address in later calls.
+
+### BUG-05: Illegal State Transition for Tickets
+- **Endpoint**: `PUT /api/v1/support/tickets/{id}`
+- **Expected Result**: `400 Bad Request` when skipping from `OPEN` to `CLOSED`.
+- **Actual Result**: `200 OK` (Allowed direct transition, violating one-way state rules).
+
+### BUG-06: Inconsistent Authentication Requirements
+- **Endpoint**: `GET /api/v1/products`
+- **Expected Result**: Constant header requirements regardless of query parameters.
+- **Actual Result**: Adding `?sort=price_asc` triggers a mandatory `X-User-ID` check that is not present on the base endpoint.
+
+### BUG-07: Admin Product Schema Mismatch (Missing Stock)
+- **Endpoint**: `GET /api/v1/admin/products`
+- **Expected Result**: Each product object includes a `stock` field.
+- **Actual Result**: `stock` field is missing, preventing inventory auditing.
+
+### BUG-08: Invoice Schema Mismatch (Missing GST)
+- **Endpoint**: `GET /api/v1/orders/{id}/invoice`
+- **Expected Result**: Invoice shows the `gst` amount.
+- **Actual Result**: `gst` field is missing from the response.
+
+### BUG-09: Cart Add Response Schema Mismatch
 - **Endpoint**: `POST /api/v1/cart/add`
-- **Request Payload**: 
-  - **Method**: POST
-  - **URL**: `http://localhost:8080/api/v1/cart/add`
-  - **Body**: `{"product_id": 1, "quantity": 2}`
-- **Expected Result**: JSON response containing the full cart items and total.
-- **Actual Result**: `{"message": "Item added to cart"}` (Missing `items` and `total` fields).
+- **Expected Result**: Full cart state (`items`, `total`) returned.
+- **Actual Result**: Only a success message is returned.
+
+### BUG-10: Admin Coupons Schema Mismatch
+- **Endpoint**: `GET /api/v1/admin/coupons`
+- **Expected Result**: List of coupons with their `code`.
+- **Actual Result**: `code` field is missing or incorrectly named.
