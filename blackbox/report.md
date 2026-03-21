@@ -99,13 +99,13 @@ The automated test suite was executed using Pytest and Requests against the live
 
 | Category | Tests | Passed | Failed | Success Rate |
 | :--- | :--- | :--- | :--- | :--- |
-| Security & Headers | 12 | 10 | 2 | 83% |
-| Admin / Data | 7 | 4 | 3 | 57% |
-| Profile & Addresses| 25 | 20 | 5 | 80% |
-| Product Catalog | 18 | 15 | 3 | 83% |
-| Cart & Checkout | 25 | 19 | 6 | 76% |
-| Others (Fuzzing/REV) | 30 | 25 | 5 | 83% |
-| **Total** | **117** | **93** | **24** | **79%** |
+| Security & Headers | 15 | 13 | 2 | 86% |
+| Admin / Data | 10 | 7 | 3 | 70% |
+| Profile & Addresses| 40 | 35 | 5 | 87% |
+| Product Catalog | 50 | 47 | 3 | 94% |
+| Cart & Checkout | 50 | 44 | 6 | 88% |
+| Others (Fuzzing/REV) | 58 | 52 | 6 | 89% |
+| **Total** | **223** | **198** | **25** | **88%** |
 
 ---
 
@@ -230,3 +230,8 @@ The automated test suite was executed using Pytest and Requests against the live
 - **Endpoint**: `POST /api/v1/admin/coupons`
 - **Expected Result**: `400 Bad Request` for percentage discounts > 100%.
 - **Actual Result**: `200 OK` (Allows creating >100% discount coupons).
+
+### BUG-25: Routing / Parsing Crash (Review Rating)
+- **Endpoint**: `POST /api/v1/reviews`
+- **Expected Result**: `400 Bad Request` for invalid rating strings like `--` or `*`.
+- **Actual Result**: `404 Not Found` (Parser confuses data for a non-existent route).
