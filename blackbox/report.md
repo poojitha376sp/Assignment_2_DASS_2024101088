@@ -72,28 +72,31 @@ Testing balance management and point redemption invariants.
 | **LOY-02** | Min Redemption **[B]**| `points`: 0 | `400 Bad Request` | Verifies valid transaction thresholds. |
 
 ### 1.6 Orders & Support Tickets
-Testing life-cycle transitions and invariant checks.
+Testing state machine transitions, resource immutability, and cross-user support security.
 
-| ID | Endpoint | Method | Input (Context) | Expected Output | Justification |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **ORD-01** | `/api/v1/orders/{id}/cancel`| POST| Cancel "Delivered" order | `400 Bad Request` | Verify order state immutability after delivery. |
-| **ORD-02** | `/api/v1/orders/{id}/cancel`| POST| Cancel "Cancelled" order | `400 Bad Request` | Verify state machine idempotency/strictness. |
-| **ORD-03** | `/api/v1/orders/999/invoice`| GET | Request missing invoice | `404 Not Found` | Verify consistency of resource discovery errors. |
-| **SUPP-01** | `/api/v1/support/ticket` | POST | `{"subject": "Hi", ...}` | `400 Bad Request` | Verify subject length constraint (min 5 chars). |
-| **SUPP-02** | `/api/v1/support/tickets/{id}`| PUT | `status: OPEN -> CLOSED` | `400 Bad Request`| Verify status transition (must go through IN_PROGRESS). |
-| **SUPP-03** | `/api/v1/support/tickets/{id}`| PUT | `subject: "New Sub" (CLOSED)` | `400 Bad Request`| Verify field immutability for final-state tickets. |
-| **REV-04** | `/api/v1/reviews/average` | GET | Multiple ratings (5 and 4) | `average_rating: 4.5` | Verify mathematical calculation accuracy. |
+| ID | Scenario [Type] | Input | Expected Output (Status / JSON / Data) | Justification & Importance |
+| :--- | :--- | :--- | :--- | :--- |
+| **ORD-01**| Finality Guard **[I]**| Cancel "Delivered" | `400 Bad Request` | Verifies that settled states cannot be reversed. |
+| **ORD-02**| Idempotency **[I]**| Double Cancel | `400 Bad Request` | Ensures system state doesn't oscillate on duplicate hits. |
+| **ORD-03**| Missing Resource **[I]**| Invoice for ID:999| `404 Not Found` | Verifies consistency of resource finding logic. |
+| **SUPP-01**| Subject Length **[B]**| `subject`: "Hi" | `400 Bad Request` | Prevents low-quality/empty support tickets (min 5). |
+| **SUPP-02**| State Skip **[I]**| `OPEN -> CLOSED` | `400 Bad Request` | Verifies mandatory "In Progress" intermediate state. |
+| **SUPP-03**| Immutability **[I]**| Update CLOSED tkt | `400 Bad Request` | Ensures records cannot be altered after resolution. |
+| **SUPP-04**| Privileged Update **[I]**| Admin update User| `200 OK` | Verifies administrative override capabilities. |
+| **REV-01**| Order-Linked **[I]**| Review unordered | `400 Bad Request` | Critical anti-spam/anti-fraud logic. |
+| **REV-02**| Duplicate Block **[I]**| Double review | `400 Bad Request` | Prevents rating manipulation by single users. |
+| **REV-03**| Rating Range **[B]**| `rating`: 6 | `400 Bad Request` | Verifies standard 1-5 scale integrity. |
 
 ### 1.7 Fuzzing & Advanced Stress
-Testing system resilience against data-type violations and extreme fuzzing (60+ scenarios).
+Testing system resilience against data-type violations and high-volume adversarial traffic.
 
-| ID | Endpoint | Method | Input Variation | Expected Output | Justification |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **FUZZ-01** | `/api/v1/products` | GET | SQL Injection, XSS, etc | `200/400` (No 500) | Verify sanitization of query parameters. |
-| **FUZZ-02** | `/api/v1/cart/add` | POST | `quantity: null/float/str` | `400 Bad Request` | Verify strict type validation for quantities. |
-| **FUZZ-03** | `/api/v1/profile` | PUT | String Overflow (>1000 chars)| `400 Bad Request` | Verify buffer/length constraints on inputs. |
-| **FUZZ-04** | `/api/v1/addresses` | POST | `pincode: True/None/Object` | `400 Bad Request` | Verify strict type validation for pincodes. |
-| **SEC-06** | `/api/v1/wallet/balance`| GET | Request WITHOUT User ID | `400 Bad Request` | Verify identification requirements for private data. |
+| ID | Category | Examples | Expected Output | Justification & Importance |
+| :--- | :--- | :--- | :--- | :--- |
+| **STRS-01**| SQL Injection | `' OR 1=1 --`, `; DROP` | `400 / 200 (Empty)` | Ensures DB security across all query parameters. |
+| **STRS-02**| XSS Payloads | `<script>`, `onerror=` | `400 / 200 (Escaped)`| Protects other users from malicious script injection. |
+| **STRS-03**| Type Safety | `null`, `[]`, `True` | `400 Bad Request` | Ensures the API doesn't crash on non-string inputs. |
+| **STRS-04**| Large Payload | 2000+ char string | `400 / 413` | Prevents memory exhaustion / DoS via string overflow. |
+| **PREC-01**| Float Precision| `amount`: 0.0000001 | `400 Bad Request` | Verifies minimum financial transaction thresholds. |
 
 ---
 
