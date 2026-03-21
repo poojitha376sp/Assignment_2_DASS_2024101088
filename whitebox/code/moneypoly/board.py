@@ -1,3 +1,8 @@
+"""
+Module: board
+This module defines the Board class, which maintains the state of all 40 tiles,
+including special tiles like taxes and cards, and purchasable properties.
+"""
 from moneypoly.property import Property, PropertyGroup
 from moneypoly.config import (
     JAIL_POSITION,

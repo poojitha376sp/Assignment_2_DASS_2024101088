@@ -28,3 +28,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 8.98/10
 - **Score After**: 9.15/10 (+0.17)
 - **Action**: Documented the module's responsibility for board tile entities and group arithmetic.
+
+---
+
+## Iteration 3: Module Docstring in `board.py`
+- **Target File**: `whitebox/code/moneypoly/board.py`
+- **Pylint Warning**: `C0114: Missing module docstring`
+- **Justification**: Added a high-level description to `board.py`. This module acts as the central registry for both special squares and purchasable properties, so a docstring helps explain how indexing works.
+- **Score Before**: 6.92/10
+- **Score After**: 7.18/10 (+0.26)
+- **Action**: Added an overview explaining the SPECIAL_TILES map and the Board initialization sequence.
