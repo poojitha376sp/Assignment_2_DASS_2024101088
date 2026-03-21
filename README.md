@@ -24,7 +24,16 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)/whitebox/code/
 pytest whitebox/tests/
 ```
 
-### **2. Part 3: Black Box API Testing (QuickCart)**
+### **2. Part 2: Integration Testing (StreetRace Manager)**
+Build and verify the internal logic of the StreetRace Manager.
+
+**Pytest (Cross-Module Integration)**
+```bash
+export PYTHONPATH=$PYTHONPATH:$(pwd)
+pytest integration/tests/
+```
+
+### **3. Part 3: Black Box API Testing (QuickCart)**
 The server must be running (Docker) before execution.
 
 **Start Server**
@@ -48,12 +57,14 @@ pytest blackbox/tests/
 3.  **Logical Bug Hunting**: Each test case was designed to trigger specific CFG branches. This revealed 7 critical logical errors (e.g., missing rent transfers, incorrect Go salary boundaries), which were fixed and committed individually.
 
 ### **Part 2: Integration Testing (StreetRace Manager)**
-*In Progress / Deferred.* Designed 8 interconnected modules including "Vehicle Tuning" and "Sponsorships" to verify complex inter-module communications.
+1.  **Modular 8-Component Design**: I implemented 6 mandatory modules (Registration, Crew, Inventory, Race, Results, Missions) and 2 bonus modules (**Vehicle Tuning** and **Sponsorships**).
+2.  **Cross-Module Dependency Logic**: The system enforces strict business rules (e.g., race results automatically updating inventory cash, missions requiring specific crew roles).
+3.  **Integration Suite**: Created 7 test scenarios in Pytest that verify complex multi-module flows (e.g., winning a race triggers a sponsorship bonus and updates bank balance).
 
 ### **Part 3: Black Box API Testing (QuickCart)**
-1.  **Scenario Design**: I designed 20+ test scenarios based strictly on the API documentation, covering valid/invalid inputs, header security, and boundary values (e.g., COD limits, name lengths).
-2.  **Automation Framework**: Built a modular Pytest suite using `requests`. Implemented shared fixtures in `conftest.py` to handle `X-Roll-Number` and `X-User-ID` headers centrally.
-3.  **Expected vs Actual Verification**: Tests verify status codes, JSON structures, and data correctness against the technical specification.
+1.  **Scenario Design**: I designed 240+ test scenarios based strictly on the API documentation, covering valid/invalid inputs, header security, and boundary values.
+2.  **Bug Identification**: Successfully identified and documented **29 unique bugs** ranging from simple schema mismatches to critical privilege escalation vulnerabilities.
+3.  **Automation Framework**: Built a modular Pytest suite using `requests`. Implemented shared fixtures in `conftest.py` to handle `X-Roll-Number` and `X-User-ID` headers centrally.
 
 ---
 **Author**: Poojitha J (2024101088)
