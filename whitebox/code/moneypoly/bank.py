@@ -1,4 +1,8 @@
-import math
+"""
+Module: bank
+This module manages the bank's total funds, collects payments from players
+(taxes/properties), and handles the issuance of emergency loans.
+"""
 from moneypoly.config import BANK_STARTING_FUNDS
 
 

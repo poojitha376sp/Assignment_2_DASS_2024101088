@@ -48,3 +48,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 7.04/10
 - **Score After**: 7.41/10 (+0.37)
 - **Action**: Added a summary of the Dice class and its role in the game loop.
+
+---
+
+## Iteration 5: Module Docstring in `bank.py`
+- **Target File**: `whitebox/code/moneypoly/bank.py`
+- **Pylint Warning**: `C0114: Missing module docstring`
+- **Justification**: Added a high-level description to `bank.py`. Since this module handles all the financial transactions and emergency loans, a module docstring is needed to explain its internal accounting.
+- **Score Before**: 7.71/10
+- **Score After**: 8.24/10 (+0.53)
+- **Action**: Added a summary of the Bank class and its role in the MoneyPoly economy. I also took the opportunity to remove an unused math import.
