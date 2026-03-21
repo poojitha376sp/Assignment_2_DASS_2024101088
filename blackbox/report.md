@@ -80,11 +80,11 @@ The automated test suite was executed using Pytest and Requests against the live
 | :--- | :--- | :--- | :--- | :--- |
 | Security & Headers | 3 | 3 | 0 | 100% |
 | Admin / Data | 2 | 2 | 0 | 100% |
-| Profile & Addresses| 7 | 4 | 3 | 57% |
+| Profile & Addresses| 8 | 4 | 4 | 50% |
 | Product Catalog | 4 | 2 | 2 | 50% |
-| Cart & Checkout | 10 | 7 | 3 | 70% |
-| Others (Wallet, etc)| 14| 12| 2 | 85% |
-| **Total** | **40** | **30** | **10** | **75%** |
+| Cart & Checkout | 11 | 8 | 3 | 72% |
+| Others (Wallet, etc)| 15| 12| 3 | 80% |
+| **Total** | **43** | **31** | **12** | **72%** |
 
 ---
 
@@ -135,7 +135,12 @@ The automated test suite was executed using Pytest and Requests against the live
 - **Expected Result**: Full cart state (`items`, `total`) returned.
 - **Actual Result**: Only a success message is returned.
 
-### BUG-10: Admin Coupons Schema Mismatch
-- **Endpoint**: `GET /api/v1/admin/coupons`
-- **Expected Result**: List of coupons with their `code`.
-- **Actual Result**: `code` field is missing or incorrectly named.
+### BUG-11: Data Validation Failure (Alphanumeric Pincode)
+- **Endpoint**: `POST /api/v1/addresses`
+- **Expected Result**: `400 Bad Request` for pincode `123A56`.
+- **Actual Result**: `200 OK` (Accepted non-digit characters).
+
+### BUG-12: Ticket Immutability Violation
+- **Endpoint**: `PUT /api/v1/support/tickets/{id}`
+- **Expected Result**: `400 Bad Request` when trying to re-open a `CLOSED` ticket.
+- **Actual Result**: `200 OK` (Allowed state change from CLOSED back to OPEN).
