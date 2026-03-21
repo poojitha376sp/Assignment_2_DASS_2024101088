@@ -99,13 +99,13 @@ The automated test suite was executed using Pytest and Requests against the live
 
 | Category | Tests | Passed | Failed | Success Rate |
 | :--- | :--- | :--- | :--- | :--- |
-| Security & Headers | 15 | 13 | 2 | 86% |
-| Admin / Data | 10 | 7 | 3 | 70% |
-| Profile & Addresses| 40 | 35 | 5 | 87% |
+| Security & Headers | 20 | 17 | 3 | 85% |
+| Admin / Data | 15 | 10 | 5 | 66% |
+| Profile & Addresses| 45 | 40 | 5 | 88% |
 | Product Catalog | 50 | 47 | 3 | 94% |
-| Cart & Checkout | 50 | 44 | 6 | 88% |
-| Others (Fuzzing/REV) | 58 | 52 | 6 | 89% |
-| **Total** | **223** | **198** | **25** | **88%** |
+| Cart & Checkout | 50 | 43 | 7 | 86% |
+| Others (Fuzzing/REV) | 60 | 54 | 6 | 90% |
+| **Total** | **240** | **211** | **29** | **88%** |
 
 ---
 
@@ -229,9 +229,29 @@ The automated test suite was executed using Pytest and Requests against the live
 ### BUG-24: Financial Invariant Violation (Impossible Coupons)
 - **Endpoint**: `POST /api/v1/admin/coupons`
 - **Expected Result**: `400 Bad Request` for percentage discounts > 100%.
-- **Actual Result**: `200 OK` (Allows creating >100% discount coupons).
+- **Actual Result**: `200 OK`.
 
 ### BUG-25: Routing / Parsing Crash (Review Rating)
 - **Endpoint**: `POST /api/v1/reviews`
-- **Expected Result**: `400 Bad Request` for invalid rating strings like `--` or `*`.
-- **Actual Result**: `404 Not Found` (Parser confuses data for a non-existent route).
+- **Expected Result**: `400 Bad Request` for invalid rating strings like `--`.
+- **Actual Result**: `404 Not Found`.
+
+### BUG-26: Business Logic Failure (Coupon Recycling)
+- **Endpoint**: `POST /api/v1/coupon/apply`
+- **Expected Result**: One-time coupons should be reusable if the order was cancelled.
+- **Actual Result**: `400 Bad Request` (Coupon marked as used permanently).
+
+### BUG-27: Admin Logic Failure (Negative Price)
+- **Endpoint**: `PUT /api/v1/admin/products/{id}`
+- **Expected Result**: `400 Bad Request` when setting price to -100.
+- **Actual Result**: `200 OK` (Accepted negative price).
+
+### BUG-28: Admin Logic Failure (Negative Stock)
+- **Endpoint**: `PUT /api/v1/admin/products/{id}`
+- **Expected Result**: `400 Bad Request` when setting stock to -10.
+- **Actual Result**: `200 OK` (Accepted negative stock).
+
+### BUG-29: Critical Security Vulnerability (Privilege Escalation)
+- **Endpoint**: `GET /api/v1/admin/users`
+- **Expected Result**: `403 Forbidden` for regular users.
+- **Actual Result**: `200 OK` (Admin data leaked to all valid roll number holders).
