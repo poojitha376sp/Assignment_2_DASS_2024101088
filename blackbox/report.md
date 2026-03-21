@@ -34,39 +34,42 @@ Validating constraints on user-supplied data and address invariants.
 | **ADDR-05**| Missing Field **[M]** | `{pincode: 123456}`| `400 Bad Request` | Ensures all components of an address are present. |
 
 ### 1.3 Product Catalog
-Testing search, filter, and visibility rules.
+Testing visibility, search accuracy, and sorting logic for consumer-facing browse features.
 
-| ID | Endpoint | Method | Input (Query) | Expected Output | Justification |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **PROD-01** | `/api/v1/products` | GET | None | List of active products only | Verify privacy/state filtering (inactive products hidden). |
-| **PROD-02** | `/api/v1/products/9999` | GET | ID: 9999 (Non-existent) | `404 Not Found` | Verify error handling for missing resources. |
-| **PROD-03** | `/api/v1/products` | GET | `sort=price_asc` | Sorted JSON list | Verify sorting logic and numerical accuracy. |
-| **PROD-04** | `/api/v1/products` | GET | `category=...&search=...` | Combined filter results | Verify multi-parameter query processing. |
+| ID | Scenario [Type] | Input | Expected Output (Status / JSON / Data) | Justification & Importance |
+| :--- | :--- | :--- | :--- | :--- |
+| **PROD-01**| State Filtering **[V]**| Base URL | List where `active: True` | Ensures consumers don't see unlisted items. |
+| **PROD-02**| Resource Discovery **[I]**| ID: 9999 | `404 Not Found` | Verifies graceful error handling for missing items. |
+| **PROD-03**| Sort Numerics **[V]** | `?sort=price_asc` | JSON array, `p[i] <= p[i+1]` | Verifies numerical sorting and API correctness. |
+| **PROD-04**| Matrix Search **[V]** | `?cat=X&q=Y` | Combined results | Verifies multi-parameter query processing. |
+| **PROD-05**| Inactive Lookup **[I]**| ID: [Inactive] | `404 Not Found` | Ensures single-item lookup honors state rules. |
+| **PROD-06**| String Fuzzing **[I]**| `search`: "'--" | `200/400` (No 500) | Verifies sanitization against SQL Injection. |
 
 ### 1.4 Cart & Checkout Logic
-Verifying transaction rules and financial correctness.
+Verifying stateful transitions, inventory guards, and financial logic.
 
-| ID | Endpoint | Method | Input (Body) | Expected Output | Justification |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **CART-01** | `/api/v1/cart/add` | POST | `{"product_id": 1, "quantity": 0}` | `400 Bad Request` | Verify minimum quantity constraint. |
-| **CART-02** | `/api/v1/cart/add` | POST | `{"product_id": 1, "quantity": 1000}` | `400 Bad Request` | Verify inventory/stock check logic. |
-| **CART-03** | `/api/v1/cart/add` | POST | Add same item twice | Merged quantities | Verify quantity accumulation (not replacement). |
-| **COUP-01** | `/api/v1/coupon/apply` | POST | `{"code": "SAVE10"}` (Low Cart Value) | `400 Bad Request` | Verify minimum cart value constraint for coupons. |
-| **COUP-02** | `/api/v1/coupon/apply` | POST | Large cart value | Cap applied | Verify maximum discount cap enforcement. |
-| **CHCK-01** | `/api/v1/checkout` | POST | `{"payment_method": "BITCOIN"}` | `400 Bad Request` | Verify restricted payment methods (COD, WALLET, CARD only). |
-| **CHCK-02** | `/api/v1/checkout` | POST | `{"payment_method": "COD"}` (Order > 5000) | `400 Bad Request` | Verify COD upper limit constraint ($5000). |
-| **FIN-01** | `/api/v1/checkout` | POST | Valid Cart | `GST: 5%` calculation | Verify tax calculation accuracy and precision. |
+| ID | Scenario [Type] | Input | Expected Output (Status / JSON / Data) | Justification & Importance |
+| :--- | :--- | :--- | :--- | :--- |
+| **CART-01**| Min Quantity **[B]**| `quantity`: 0 | `400 Bad Request` | Prevents nonsensical 0-item additions. |
+| **CART-02**| Inventory Stock **[B]**| `qty`: 999999 | `400 Bad Request` | Essential guard against overselling. |
+| **CART-03**| State Merge **[V]** | Add existing | Merged quantities | Verifies correct state accumulation logic. |
+| **CART-04**| Null Quantity **[T]** | `qty`: null | `400 Bad Request` | Verifies type-safety for cart transactions. |
+| **COUP-01**| Min Threshold **[B]**| `SAVE10` < $500| `400 Bad Request` | Verifies minimum cart value rule enforcement. |
+| **COUP-02**| Discount Caps **[B]**| Huge cart val| `total = max_cap` | Verifies maximum discount cap enforcement. |
+| **CHCK-01**| Payment Filter **[I]**| `meth`: BTC | `400 Bad Request` | Ensures only white-listed payment methods. |
+| **CHCK-02**| COD Threshold **[B]**| Value > $5000 | `400 Bad Request` | Critical anti-fraud and risk management rule. |
+| **FIN-01** | Tax Precision **[V]** | Valid Order | `Total = Sub + 5% GST`| Ensures financial accuracy and legal compliance. |
 
 ### 1.5 Wallet & Loyalty Points
-Testing balance management and point redemption.
+Testing balance management and point redemption invariants.
 
-| ID | Endpoint | Method | Input (Body) | Expected Output | Justification |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **WALL-01** | `/api/v1/wallet/pay` | POST | `{"amount": 999999}` | `400 Bad Request` | Verify insufficient balance handling. |
-| **WALL-02** | `/api/v1/wallet/add` | POST | `{"amount": -10}` | `400 Bad Request` | Verify positive amount constraint for top-ups. |
-| **LOY-01** | `/api/v1/loyalty/redeem`| POST | `{"points": 1}` (Zero balance) | `400 Bad Request` | Verify redemption eligibility checks. |
-| **LOY-02** | `/api/v1/loyalty/redeem`| POST | `{"points": 0}` | `400 Bad Request` | Verify minimum redemption limit (at least 1 point). |
-| **WALL-03** | `/api/v1/wallet/add` | POST | `{"amount": 100001}` | `400 Bad Request` | Verify maximum top-up boundary ($100,000). |
+| ID | Scenario [Type] | Input | Expected Output (Status / JSON / Data) | Justification & Importance |
+| :--- | :--- | :--- | :--- | :--- |
+| **WALL-01**| Low Balance **[B]** | `pay`: $10^6$ | `400 Bad Request` | Validates insufficient funds handling. |
+| **WALL-02**| Sign Check **[B]** | `add`: -$10$ | `400 Bad Request` | Prevents balance reduction via top-up. |
+| **WALL-03**| Maximum Top-up **[B]**| `add`: $100001$| `400 Bad Request` | Prevents runaway balance growth. |
+| **LOY-01** | Eligibility **[V]** | Redeem > Bal | `400 Bad Request` | Ensures points are earned before spending. |
+| **LOY-02** | Min Redemption **[B]**| `points`: 0 | `400 Bad Request` | Verifies valid transaction thresholds. |
 
 ### 1.6 Orders & Support Tickets
 Testing life-cycle transitions and invariant checks.
