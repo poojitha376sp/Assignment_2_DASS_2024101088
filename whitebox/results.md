@@ -146,3 +146,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 8.57/10 (Group average)
 - **Score After**: 8.78/10 (+0.21)
 - **Action**: Removed unused imports from header sections and ensured all files end with the standard blank line.
+
+---
+
+## Iteration 14: Attribute Initialization in `dice.py`
+- **Target File**: `whitebox/code/moneypoly/dice.py`
+- **Pylint Warning**: `W0201: Attribute 'doubles_streak' defined outside __init__`
+- **Justification**: In Python, all instance attributes should be declared in the constructor. Initializing `doubles_streak` in `__init__` makes the object state explicit and avoids runtime errors if the attribute is accessed before the first roll.
+- **Score Before**: 9.62/10
+- **Score After**: 10.00/10 (+0.38)
+- **Action**: Added `self.doubles_streak = 0` to the `Dice` constructor.

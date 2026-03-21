@@ -8,6 +8,7 @@ class Dice:
     """Simulates a pair of six-sided dice with consecutive-doubles tracking."""
 
     def __init__(self):
+        self.doubles_streak = 0
         self.die1 = 0
         self.die2 = 0
         self.reset()
