@@ -1,9 +1,5 @@
-# MoneyPoly White-Box Testing - Pylint Results
 
-This document tracks the iterative improvements made to the MoneyPoly codebase using Pylint, as required by Part 1.2 of the assignment.
-
----
-
+## Part 1.2: Pylint Score Improvements
 ## Initial State
 - **Command**: `pylint whitebox/code/moneypoly/`
 - **Initial Score**: 8.17/10 (Average across all modules)
@@ -213,10 +209,13 @@ This section documents the white-box test suite designed to cover all branches, 
 ### Test Case Design & Justification
 | ID | Branch/Feature | Justification | Results |
 | :--- | :--- | :--- | :--- |
-| **TC-01** | Movement (Pass Go) | Verify salary is credited when passing position 0. | **FAILED** (Found Bug #2) |
-| **TC-02** | Jail (Pay Fine) | Verify player is released after paying $50. | **FAILED** (Found Bug #1) |
-| **TC-03** | Jail (Doubles Roll) | Verify release via luck (Node 11). | **FAILED** (Found Bug #3) |
-| **TC-04** | Jail (3rd Turn Forced) | Verify forced release after 3 turns (Node 12). | **PASSED** (Logic present) |
+| **TC-01** | Movement (Pass Go) | Verify salary is credited when passing position 0. | **PASSED** (Fixed) |
+| **TC-02** | Jail (Pay Fine) | Verify player is released after paying $50. | **PASSED** (Fixed) |
+| **TC-03** | Jail (Doubles Roll) | Verify release via luck (Node 11). | **PASSED** (Fixed) |
+| **TC-04** | Jail (3rd Turn Forced) | Verify forced release after 3 turns (Node 12). | **PASSED** (Fixed) |
+| **TC-05** | Purchase (Normal) | Verify buying unowned property (Node 24). | **PASSED** |
+| **TC-06** | Auction (Winning Bid) | Transfer to highest bidder (Node 28). | **PASSED** |
+| **TC-07** | Auction (No Bidders) | Remains unowned (Node 27). | **PASSED** |
 
 ### Errors & Logical Issues Found
 #### **Error #1: Voluntary Jail Fine - Missing Player Deduction**
