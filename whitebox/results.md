@@ -38,3 +38,13 @@ This document tracks the iterative improvements made to the MoneyPoly codebase u
 - **Score Before**: 6.92/10
 - **Score After**: 7.18/10 (+0.26)
 - **Action**: Added an overview explaining the SPECIAL_TILES map and the Board initialization sequence.
+
+---
+
+## Iteration 4: Module Docstring in `dice.py`
+- **Target File**: `whitebox/code/moneypoly/dice.py`
+- **Pylint Warning**: `C0114: Missing module docstring`
+- **Justification**: Added a high-level description to `dice.py`. This module acts as the engine of player movement, so it's important to document how it handles both RNG and the specific "doubles streak" rule.
+- **Score Before**: 7.04/10
+- **Score After**: 7.41/10 (+0.37)
+- **Action**: Added a summary of the Dice class and its role in the game loop.

@@ -1,3 +1,7 @@
+"""
+This module simulates the rolling of two six-sided dice and tracks 
+consecutive doubles for the 'Go to Jail' speed limit rule.
+"""
 import random
 from moneypoly.config import BOARD_SIZE
 
