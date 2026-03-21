@@ -216,6 +216,9 @@ This section documents the white-box test suite designed to cover all branches, 
 | **TC-05** | Purchase (Normal) | Verify buying unowned property (Node 24). | **PASSED** |
 | **TC-06** | Auction (Winning Bid) | Transfer to highest bidder (Node 28). | **PASSED** |
 | **TC-07** | Auction (No Bidders) | Remains unowned (Node 27). | **PASSED** |
+| **TC-08** | Rent (Standard) | Verify rent calculation for single property. | **FAILED** (Investigating) |
+| **TC-09** | Rent (Full Group) | Verify rent multiplier for full set. | **PASSED** (Fixed Bug #4) |
+| **TC-10** | Rent (Mortgaged) | Verify no rent on mortgaged properties. | **PASSED** |
 
 ### Errors & Logical Issues Found
 #### **Error #1: Voluntary Jail Fine - Missing Player Deduction**
