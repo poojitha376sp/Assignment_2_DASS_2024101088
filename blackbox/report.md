@@ -9,26 +9,29 @@ This report documents the test case design, execution results, and bug reports f
 ### 1.1 Header & Security Validation
 Every request must include `X-Roll-Number`. User-scoped endpoints also require `X-User-ID`.
 
-| ID | Endpoint | Method | Input (Headers/Body) | Expected Output | Justification |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **SEC-01** | `/api/v1/admin/users` | GET | Missing `X-Roll-Number` | `401 Unauthorized` | Verify mandatory system access control. |
-| **SEC-02** | `/api/v1/admin/users` | GET | `X-Roll-Number`: "ABC" | `400 Bad Request` | Verify data type validation for headers (integer required). |
-| **SEC-03** | `/api/v1/profile` | GET | Missing `X-User-ID` | `400 Bad Request` | Verify user scoping for personal data. |
-| **SEC-04** | `/api/v1/profile` | GET | `X-User-ID`: -5 | `400 Bad Request` | Verify boundary validation (must be positive integer). |
-| **SEC-05** | `/api/v1/support/tickets/{id}`| PUT | User A updates User B ticket| `403 Forbidden` | Verify multi-user access control and data privacy. |
+| ID | Scenario [Type] | Input | Expected Output (Status / JSON / Data) | Justification & Importance |
+| :--- | :--- | :--- | :--- | :--- |
+| **SEC-01** | Missing Roll No **[M]** | No `X-Roll-Number` | `401 Unauthorized` | Ensures mandatory system-wide access control. |
+| **SEC-02** | Invalid Roll Type **[T]** | `X-Roll-Number`: "ABC" | `400 Bad Request` | Verifies data type safety for system headers. |
+| **SEC-03** | Missing User ID **[M]** | No `X-User-ID` | `400 Bad Request` | Ensures user-scoped data cannot be accessed anonymously. |
+| **SEC-04** | Negative User ID **[B]**| `X-User-ID`: -5 | `400 Bad Request` | Verifies positive integer boundaries. |
+| **SEC-05** | Auth Leak **[I]**| Regular user hit Admin| `403 Forbidden` | Critical for privilege escalation prevention. |
+| **SEC-06** | Access Control **[I]**| User A hits User B tkt| `403 Forbidden` | Ensures cross-user data isolation. |
+| **SEC-07** | No Headers **[M]** | Empty Headers | `401 Unauthorized` | Verifies default rejection of unauthenticated traffic. |
 
 ### 1.2 Profile & Address Management
-Validating constraints on user-submitted data.
+Validating constraints on user-supplied data and address invariants.
 
-| ID | Endpoint | Method | Input (Body) | Expected Output | Justification |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **PROF-01** | `/api/v1/profile` | PUT | `{"name": "A", "phone": "1234567890"}` | `400 Bad Request` | Verify name length constraint (min 2 chars). |
-| **PROF-02** | `/api/v1/profile` | PUT | `{"name": "Tester", "phone": "123"}` | `400 Bad Request` | Verify phone length constraint (exactly 10 digits). |
-| **ADDR-01** | `/api/v1/addresses` | POST | `{"label": "VACATION", ...}` | `400 Bad Request` | Verify enum constraint (HOME, OFFICE, OTHER only). |
-| **ADDR-02** | `/api/v1/addresses` | POST | `{"pincode": "1234567"}` | `400 Bad Request` | Verify pincode length constraint (exactly 6 digits). |
-| **ADDR-03** | `/api/v1/addresses` | POST | Adding 2nd default address | Existing default is unset | Verify "only one default address" business logic. |
-| **ADDR-04** | `/api/v1/addresses` | POST | `{"pincode": "123A56"}` | `400 Bad Request` | Verify data type validation (digits only) on CREATE. |
-| **ADDR-05** | `/api/v1/addresses/{id}`| PUT | `{"pincode": "ABCDEF"}` | `400 Bad Request` | Verify data type validation (digits only) on UPDATE. |
+| ID | Scenario [Type] | Input | Expected Output (Status / JSON / Data) | Justification & Importance |
+| :--- | :--- | :--- | :--- | :--- |
+| **PROF-01**| Min Name Length **[B]**| `name`: "A" | `400 Bad Request` | Ensures realistic identity data (min 2 chars). |
+| **PROF-02**| Phone Length **[B]** | `phone`: "123" | `400 Bad Request` | Ensures exact 10-digit mobile format. |
+| **PROF-03**| Phone Type **[T]** | `phone`: 1234567890 | `400 Bad Request` | Verifies JSON string constraint for phone fields. |
+| **ADDR-01**| Enum Violation **[I]** | `label`: "VACATION" | `400 Bad Request` | Verifies adherence to allowed address types. |
+| **ADDR-02**| Pincode Length **[B]** | `pincode`: "12345" | `400 Bad Request` | Verifies exact 6-digit postal code constraint. |
+| **ADDR-03**| Pincode Format **[I]** | `pincode`: "12A456" | `400 Bad Request` | Verifies digit-only constraint for logistics. |
+| **ADDR-04**| Default Swap **[V]** | Set 2nd default | `200` + Prev unset | Verifies "single default" business logic. |
+| **ADDR-05**| Missing Field **[M]** | `{pincode: 123456}`| `400 Bad Request` | Ensures all components of an address are present. |
 
 ### 1.3 Product Catalog
 Testing search, filter, and visibility rules.
