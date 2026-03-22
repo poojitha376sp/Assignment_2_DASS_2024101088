@@ -118,6 +118,20 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-29** | Loan Accounting | Loan reduces bank reserves and records debt | **PASSED** (Fixed) |
 | **TC-30** | Empty Deck Safety | Empty card decks do not crash on count/print | **PASSED** (Fixed) |
 | **TC-31** | Purchase Ownership | Cannot buy a property already owned by someone else | **PASSED** (Fixed) |
+| **TC-32** | Bank Collection: Negative Value | Negative collection does not change bank balance | **PASSED** (Fixed) |
+| **TC-33** | UI Board Print | Board ownership table prints without crashing | **PASSED** (Fixed) |
+| **TC-34** | Trade: Negative Cash | Negative trade cash is rejected safely | **PASSED** (Fixed) |
+| **TC-35** | Purchase: Negative Price | Invalid negative property price is rejected | **PASSED** (Fixed) |
+| **TC-36** | Loan: Overdraft | Bank refuses loans larger than its funds | **PASSED** |
+| **TC-37** | Payout: Zero | Zero payout is a no-op | **PASSED** |
+| **TC-38** | Mortgage: Double Mortgage | Second mortgage returns zero and changes nothing | **PASSED** |
+| **TC-39** | Unmortgage: Not Mortgaged | Unmortgaging a clean property does nothing | **PASSED** |
+| **TC-40** | Owner Counts | Unowned properties are ignored in owner counting | **PASSED** |
+| **TC-41** | Board Purchasable Matrix | Ownership and mortgage state control purchasing | **PASSED** |
+| **TC-42** | Deck Cycling | Decks cycle and report remaining cards correctly | **PASSED** |
+| **TC-43** | Net Worth | Mortgaged properties do not count toward net worth | **PASSED** |
+| **TC-44** | No Players | Empty game has no winner | **PASSED** |
+| **TC-45** | Board Ownership Lists | Owned and unowned property lists match board state | **PASSED** |
 
 ### Errors & Logical Issues Corrected
 #### **Error #1: Jail Fine Missing Deduction**
@@ -163,12 +177,51 @@ Added support for `collect_from_all` and `birthday` cards so money moves correct
 - **TC-29** checks that emergency loans actually come out of the bank's balance.
 - **TC-30** checks that empty decks stay safe when their size or text is requested.
 - **TC-31** checks that direct property purchase refuses an already owned property.
+- **TC-32** checks that negative bank collections do not subtract money.
+- **TC-33** checks that the board ownership printer uses the real property price field.
+- **TC-34** checks that a negative trade amount is rejected instead of crashing.
+- **TC-35** checks that a negative property price is rejected instead of causing a bad purchase.
+- **TC-36** checks the over-limit loan branch where the bank should refuse to lend more than it has.
+- **TC-37** checks the zero-value payout edge case.
+- **TC-38** checks that a property cannot be mortgaged twice for extra cash.
+- **TC-39** checks that unmortgaging a clean property is harmless.
+- **TC-40** checks that the owner-count helper skips unowned properties.
+- **TC-41** checks the matrix of purchasable states across owned, mortgaged, and special tiles.
+- **TC-42** checks that deck cycling and remaining-card counts stay consistent.
+- **TC-43** checks that mortgaged property value is excluded from net worth.
+- **TC-44** checks that an empty game returns no winner instead of crashing.
+- **TC-45** checks that owned and unowned board listings stay in sync.
 
 ### New Results Summary
 - TC-22 to TC-26 did not reveal new code errors.
 - They were added to cover remaining branches and edge cases in jail handling, trading, and mortgage logic.
 - TC-27 to TC-31 revealed real defects and were fixed in the code.
 - These cases extend the white-box suite into lower-level utility behavior and more defensive state checks.
+- TC-32 to TC-35 revealed real defects and were fixed in the code.
+- TC-36 to TC-40 passed and mainly strengthened boundary coverage.
+- TC-41 to TC-45 passed and further strengthen helper-method coverage.
+
+### Error Fix Log
+This section ties the discovered issues to the tests that exposed them. The commit history currently contains the required `Error #` format for the later fixes; the earlier fixes are kept here so the report shows the full white-box trail without removing any existing summary content.
+
+| Error | What Was Wrong | Main Test Evidence | Commit |
+| :--- | :--- | :--- | :--- |
+| **Error #1** | Jail fine was not deducted when leaving jail. | TC-02 | Documented in report summary |
+| **Error #2** | Passing Go salary logic needed the correct wrap-around behavior. | TC-01 | Documented in report summary |
+| **Error #3** | Jail escape through doubles needed the correct roll branch. | TC-03 | Documented in report summary |
+| **Error #4** | Monopoly rent logic needed full group ownership, not partial ownership. | TC-09 | Documented in report summary |
+| **Error #5** | Rent had to transfer money to the owner. | TC-08 | Documented in report summary |
+| **Error #6** | Bankruptcy needed the mortgage rescue loop before elimination. | TC-11 / TC-14 | Documented in report summary |
+| **Error #7** | House building branch was missing from the interactive menu. | TC-15 | Documented in report summary |
+| **Error #8** | Exact-balance property purchases were blocked incorrectly. | TC-17 | `857c754` - Error #8: Allow exact-balance property purchases |
+| **Error #9** | Collect-from-all and birthday cards were ignored. | TC-18 / TC-19 | `4e335d8` - Error #9: Handle collect-from-all and birthday cards |
+| **Error #10** | Dice range, loan accounting, mortgage rollback, empty deck safety, and owner protection needed fixes. | TC-27 / TC-28 / TC-29 / TC-30 / TC-31 | `5f30671` - Error #10: Add branch coverage for jail trade and mortgage |
+| **Error #11** | Negative-value accounting, UI property access, and invalid trade/purchase inputs needed validation. | TC-32 / TC-33 / TC-34 / TC-35 | `8a5e028` - Error #11: Fix dice loan mortgage and ownership edge cases |
+
+### Commit Notes
+- The white-box work now has 11 total error fixes documented across the report.
+- The `Error #8` to `Error #11` items also exist as Git commits with the required format.
+- No earlier report content was removed; this log only adds the missing audit trail.
 
 ---
 

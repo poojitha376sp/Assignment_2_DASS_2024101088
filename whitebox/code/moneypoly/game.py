@@ -140,14 +140,17 @@ class Game:
         if prop.owner is not None:
             print(f"  {prop.name} is already owned by {prop.owner.name}.")
             return False
-        if player.balance < prop.financials["price"]:
+        price = prop.financials["price"]
+        if price < 0:
+            return False
+        if player.balance < price:
             print(f"  {player.name} cannot afford {prop.name}.")
             return False
-        player.deduct_money(prop.financials["price"])
+        player.deduct_money(price)
         prop.owner = player
         player.add_property(prop)
-        self.resources["bank"].collect(prop.financials["price"])
-        print(f"  {player.name} purchased {prop.name} for ${prop.financials['price']}.")
+        self.resources["bank"].collect(price)
+        print(f"  {player.name} purchased {prop.name} for ${price}.")
         return True
 
     def pay_rent(self, player, prop):
@@ -200,7 +203,7 @@ class Game:
 
     def trade(self, seller, buyer, prop, cash_amount):
         """Execute a property trade."""
-        if prop.owner != seller or buyer.balance < cash_amount:
+        if prop.owner != seller or cash_amount < 0 or buyer.balance < cash_amount:
             return False
         buyer.deduct_money(cash_amount)
         seller.add_money(cash_amount)
