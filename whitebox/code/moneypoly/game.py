@@ -41,15 +41,21 @@ class Game:
 
     def current_player(self):
         """Return the Player whose turn it currently is."""
+        if not self.players:
+            raise ValueError("Cannot select a current player when no players exist.")
         return self.players[self.turn_info["index"]]
 
     def advance_turn(self):
         """Move to the next player in the rotation."""
+        if not self.players:
+            return
         self.turn_info["index"] = (self.turn_info["index"] + 1) % len(self.players)
         self.turn_info["count"] += 1
 
     def play_turn(self):
         """Execute one complete turn for the current player."""
+        if not self.players:
+            return
         player = self.current_player()
         ui.print_banner(
             f"Turn {self.turn_info['count'] + 1}  |  {player.name}  |  ${player.balance}"
