@@ -113,6 +113,11 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-24** | Trade: Insufficient Cash | Trade fails when buyer cannot afford it | **PASSED** |
 | **TC-25** | Mortgage Cycle | Mortgage and unmortgage the same property | **PASSED** |
 | **TC-26** | Mortgage: Wrong Owner | Non-owner cannot mortgage property | **PASSED** |
+| **TC-27** | Dice Range | Dice must use two six-sided rolls | **PASSED** (Fixed) |
+| **TC-28** | Unmortgage Failure | Failed unmortgage keeps property mortgaged | **PASSED** (Fixed) |
+| **TC-29** | Loan Accounting | Loan reduces bank reserves and records debt | **PASSED** (Fixed) |
+| **TC-30** | Empty Deck Safety | Empty card decks do not crash on count/print | **PASSED** (Fixed) |
+| **TC-31** | Purchase Ownership | Cannot buy a property already owned by someone else | **PASSED** (Fixed) |
 
 ### Errors & Logical Issues Corrected
 #### **Error #1: Jail Fine Missing Deduction**
@@ -153,10 +158,17 @@ Added support for `collect_from_all` and `birthday` cards so money moves correct
 - **TC-24** checks that a trade is rejected when the buyer has too little cash.
 - **TC-25** checks that a property can be mortgaged and later unmortgaged without breaking ownership.
 - **TC-26** checks that a player cannot mortgage a property they do not own.
+- **TC-27** checks that dice are rolled with the full six-sided range instead of a smaller range.
+- **TC-28** checks that a failed unmortgage does not accidentally clear the mortgage flag.
+- **TC-29** checks that emergency loans actually come out of the bank's balance.
+- **TC-30** checks that empty decks stay safe when their size or text is requested.
+- **TC-31** checks that direct property purchase refuses an already owned property.
 
 ### New Results Summary
 - TC-22 to TC-26 did not reveal new code errors.
 - They were added to cover remaining branches and edge cases in jail handling, trading, and mortgage logic.
+- TC-27 to TC-31 revealed real defects and were fixed in the code.
+- These cases extend the white-box suite into lower-level utility behavior and more defensive state checks.
 
 ---
 

@@ -137,6 +137,9 @@ class Game:
 
     def buy_property(self, player, prop):
         """Purchase `prop` on behalf of `player`."""
+        if prop.owner is not None:
+            print(f"  {prop.name} is already owned by {prop.owner.name}.")
+            return False
         if player.balance < prop.financials["price"]:
             print(f"  {player.name} cannot afford {prop.name}.")
             return False
@@ -172,11 +175,12 @@ class Game:
         """Lift the mortgage on `prop`."""
         if prop.owner != player:
             return False
-        cost = prop.unmortgage()
-        if cost == 0:
+        if not prop.is_mortgaged:
             return False
+        cost = int(prop.financials["mortgage"] * 1.1)
         if player.balance < cost:
             return False
+        prop.unmortgage()
         player.deduct_money(cost)
         self.resources["bank"].collect(cost)
         print(f"  {player.name} unmortgaged {prop.name} for ${cost}.")
