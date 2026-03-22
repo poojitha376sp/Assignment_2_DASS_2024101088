@@ -139,11 +139,31 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-50** | Group Owner Counts | Property group counts multiple owners correctly | **PASSED** |
 | **TC-51** | Group Payment Bankruptcy | Bankrupt opponents are removed after collect-from-all | **PASSED** (Fixed) |
 | **TC-52** | Birthday Bankruptcy | Bankrupt opponents are removed after birthday payments | **PASSED** (Fixed) |
+| **TC-53** | Mortgaged Monopoly Rent | Mortgaged properties should block double rent | **PASSED** (Fixed) |
+| **TC-54** | Unmortgage Restores Monopoly | Double rent returns only when the group is fully free | **PASSED** (Fixed) |
+| **TC-55** | Mortgage Bank Accounting | Mortgaging a property reduces bank reserves | **PASSED** (Fixed) |
+| **TC-56** | Mortgage Rejection No-op | Failed mortgage attempts leave bank funds unchanged | **PASSED** |
+| **TC-57** | Empty Game Current Player | No players should fail clearly when asking for a current player | **PASSED** (Fixed) |
+| **TC-58** | Empty Game Advance Turn | Advancing turns in an empty game should do nothing | **PASSED** (Fixed) |
+| **TC-59** | Empty Game Play Turn | Playing a turn in an empty game should do nothing | **PASSED** (Fixed) |
 
 ### Errors & Logical Issues Corrected
 The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This section is kept short on purpose so it does not repeat the same information that is already shown in the test table and the commit log.
 
 ### Why the New Tests Were Added
+- **TC-01** checks that passing Go adds salary at the right time. This is a basic movement rule and a common place for off-by-one mistakes.
+- **TC-02** checks the jail fine path, because the game must charge money when a player chooses to leave jail early.
+- **TC-03** checks the doubles escape path from jail, because rolling doubles is a different branch from paying the fine.
+- **TC-04** checks the three-turn jail limit, because a player should not stay in jail forever if they keep failing to roll doubles.
+- **TC-05** checks a normal property purchase, because buying an unowned property is a core branch in the game.
+- **TC-08** checks standard rent, because rent transfer is a main money-flow path.
+- **TC-09** checks monopoly rent, because the code must handle the full-group ownership branch correctly.
+- **TC-11** checks bankruptcy recovery by mortgaging properties, because the game should try to save a player before eliminating them.
+- **TC-12** checks the Go To Jail tile, because landing on that square must override normal movement.
+- **TC-13** checks the three-doubles jail rule, because that is a separate movement-based penalty branch.
+- **TC-14** checks full bankruptcy elimination, because players with no assets must be removed from the game.
+- **TC-15** checks the house-building workflow, because the build branch is separate from buying, trading, and rent logic.
+- **TC-16** checks luxury tax, because tax tiles are another money-loss branch with different amounts.
 - **TC-17** checks the edge case where a player has exactly enough money to buy a property. This matters because the code used to reject that case.
 - **TC-18** checks the Chance card that makes one player collect money from everyone else. This covers a branch that was missing before.
 - **TC-19** checks the Community Chest birthday card. It is similar to TC-18, but it follows a different card path, so it needs its own test.
