@@ -280,14 +280,14 @@ class Game:
         elif action == "move_to":
             self._handle_card_move_to(player, value)
         elif action == "collect_from_all":
-            for other in self.players:
+            for other in list(self.players):
                 if other is player:
                     continue
                 other.deduct_money(value)
                 player.add_money(value)
                 self._check_bankruptcy(other)
         elif action == "birthday":
-            for other in self.players:
+            for other in list(self.players):
                 if other is player:
                     continue
                 other.deduct_money(value)

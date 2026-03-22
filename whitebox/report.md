@@ -146,6 +146,7 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-57** | Empty Game Current Player | No players should fail clearly when asking for a current player | **PASSED** (Fixed) |
 | **TC-58** | Empty Game Advance Turn | Advancing turns in an empty game should do nothing | **PASSED** (Fixed) |
 | **TC-59** | Empty Game Play Turn | Playing a turn in an empty game should do nothing | **PASSED** (Fixed) |
+| **TC-60** | Card Cleanup List Mutation | Removing one bankrupt player should not skip the next one | **PASSED** (Fixed) |
 
 ### Errors & Logical Issues Corrected
 The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This section is kept short on purpose so it does not repeat the same information that is already shown in the test table and the commit log.
@@ -219,9 +220,10 @@ The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This se
 - TC-55 revealed a real defect in mortgage bank accounting and was fixed in the code.
 - TC-56 passed and strengthens the mortgage no-op branch.
 - TC-57 to TC-59 revealed a real defect in empty-game safety and were fixed in the code.
+- TC-60 revealed a real defect in card cleanup list iteration and was fixed in the code.
 
 ### Error Fix Log
-This section ties the discovered issues to the tests that exposed them. Only **Errors #1 to #15** are code defects. The later commit `0434be9` is a documentation update that adds this audit trail; it is **not** a separate code error.
+This section ties the discovered issues to the tests that exposed them. Only **Errors #1 to #16** are code defects. The later commit `0434be9` is a documentation update that adds this audit trail; it is **not** a separate code error.
 
 | Error | What Was Wrong | Main Test Evidence | Commit |
 | :--- | :--- | :--- | :--- |
@@ -240,13 +242,15 @@ This section ties the discovered issues to the tests that exposed them. Only **E
 | **Error #13** | Monopoly rent still doubled even when one property in the set was mortgaged. | TC-53 / TC-54 | `a1ed3f5` - Error #13: Block monopoly rent when any property is mortgaged |
 | **Error #14** | Mortgage payouts were not reducing bank reserves after the negative-collection safety change. | TC-55 | `4901369` - Error #14: Pay out bank funds when mortgaging property |
 | **Error #15** | Empty-game turn flow crashed instead of failing or no-oping safely. | TC-57 / TC-58 / TC-59 | `dc00daa` - Error #15: Guard empty-game turn flow |
+| **Error #16** | Removing bankrupt players during card cleanup could skip the next opponent because the player list was being mutated during iteration. | TC-60 | Documented in report summary |
 
 ### Commit Notes
-- The white-box work now has 15 total error fixes documented across the report.
+- The white-box work now has 16 total error fixes documented across the report.
 - The `Error #8` to `Error #12` items also exist as Git commits with the required format.
 - `Error #13` is documented here and has a matching Git commit.
 - `Error #14` is documented here and has a matching Git commit.
 - `Error #15` is documented here and has a matching Git commit.
+- `Error #16` is documented here and has a matching Git commit.
 - No earlier report content was removed; this log only adds the missing audit trail.
 - Commit `0434be9` is a report-only update and should not be counted as `Error #12`.
 
