@@ -208,12 +208,12 @@ This section ties the discovered issues to the tests that exposed them. Only **E
 | **Error #9** | Collect-from-all and birthday cards were ignored. | TC-18 / TC-19 | `4e335d8` - Error #9: Handle collect-from-all and birthday cards |
 | **Error #10** | Dice range, loan accounting, mortgage rollback, empty deck safety, and owner protection needed fixes. | TC-27 / TC-28 / TC-29 / TC-30 / TC-31 | `5f30671` - Error #10: Add branch coverage for jail trade and mortgage |
 | **Error #11** | Negative-value accounting, UI property access, and invalid trade/purchase inputs needed validation. | TC-32 / TC-33 / TC-34 / TC-35 | `8a5e028` - Error #11: Fix dice loan mortgage and ownership edge cases |
-| **Error #12** | Card payments did not remove players who went bankrupt from the game. | TC-51 / TC-52 | `pending` - Error #12: Handle bankrupt opponents from card payments |
+| **Error #12** | Card payments did not remove players who went bankrupt from the game. | TC-51 / TC-52 | `ef73b6a` - Error #12: Handle bankrupt opponents from card payments |
 
 ### Commit Notes
 - The white-box work now has 11 total error fixes documented across the report.
 - The white-box work now has 12 total error fixes documented across the report.
-- The `Error #8` to `Error #12` items also exist as Git commits with the required format, except the new Error #12 commit is still pending until saved.
+- The `Error #8` to `Error #12` items also exist as Git commits with the required format.
 - No earlier report content was removed; this log only adds the missing audit trail.
 - Commit `0434be9` is a report-only update and should not be counted as `Error #12`.
 
