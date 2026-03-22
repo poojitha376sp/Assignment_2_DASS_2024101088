@@ -202,7 +202,7 @@ Added support for `collect_from_all` and `birthday` cards so money moves correct
 - TC-41 to TC-45 passed and further strengthen helper-method coverage.
 
 ### Error Fix Log
-This section ties the discovered issues to the tests that exposed them. The commit history currently contains the required `Error #` format for the later fixes; the earlier fixes are kept here so the report shows the full white-box trail without removing any existing summary content.
+This section ties the discovered issues to the tests that exposed them. Only **Errors #1 to #11** are code defects. The later commit `0434be9` is a documentation update that adds this audit trail; it is **not** a separate code error.
 
 | Error | What Was Wrong | Main Test Evidence | Commit |
 | :--- | :--- | :--- | :--- |
@@ -222,6 +222,7 @@ This section ties the discovered issues to the tests that exposed them. The comm
 - The white-box work now has 11 total error fixes documented across the report.
 - The `Error #8` to `Error #11` items also exist as Git commits with the required format.
 - No earlier report content was removed; this log only adds the missing audit trail.
+- Commit `0434be9` is a report-only update and should not be counted as `Error #12`.
 
 ---
 
