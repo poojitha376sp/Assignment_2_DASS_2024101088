@@ -186,7 +186,8 @@ class Game:
             return False
         if not prop.is_mortgaged:
             return False
-        cost = int(prop.financials["mortgage"] * 1.1)
+        mortgage = prop.financials["mortgage"]
+        cost = (mortgage * 11 + 9) // 10
         if player.balance < cost:
             return False
         prop.unmortgage()
@@ -202,7 +203,9 @@ class Game:
             print("  No mortgaged properties.")
             return
         for i, prop in enumerate(mortgaged):
-            print(f"  {i+1}. {prop.name} (Cost: ${int(prop.financials['mortgage']*1.1)})")
+            mortgage = prop.financials['mortgage']
+            cost = (mortgage * 11 + 9) // 10
+            print(f"  {i+1}. {prop.name} (Cost: ${cost})")
         idx = ui.safe_int_input("  Select: ", default=0) - 1
         if 0 <= idx < len(mortgaged):
             self.unmortgage_property(player, mortgaged[idx])
@@ -340,8 +343,14 @@ class Game:
             elif choice == 4:
                 self._menu_unmortgage(player)
             elif choice == 5:
-                # Placeholder trade
-                self._menu_trade(player, player)
+                others = [p for p in self.players if p is not player]
+                if not others:
+                    continue
+                for i, partner in enumerate(others):
+                    print(f"  {i+1}. {partner.name}")
+                idx = ui.safe_int_input("  Trade partner: ", default=0) - 1
+                if 0 <= idx < len(others):
+                    self._menu_trade(player, others[idx])
             elif choice == 7:
                 self._menu_build(player)
 
@@ -366,5 +375,16 @@ class Game:
                 b[idx].houses += 1
 
     def _menu_trade(self, player, partner):
-        # Extremely simplified trade for verification
-        pass
+        if partner is None or partner is player:
+            return False
+        owned = [p for p in player.properties if p.owner == player]
+        if not owned:
+            print(f"  {player.name} has no properties to trade.")
+            return False
+        for i, prop in enumerate(owned):
+            print(f"  {i+1}. {prop.name}")
+        prop_idx = ui.safe_int_input("  Select property: ", default=0) - 1
+        if not 0 <= prop_idx < len(owned):
+            return False
+        cash_amount = ui.safe_int_input(f"  Cash from {partner.name}: ", default=0)
+        return self.trade(player, partner, owned[prop_idx], cash_amount)

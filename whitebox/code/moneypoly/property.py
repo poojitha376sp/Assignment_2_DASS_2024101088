@@ -2,6 +2,8 @@
 This module handles the Property and PropertyGroup classes, governing how 
 tiles are owned and how rent is calculated across different groups.
 """
+
+
 class Property:
     """Represents a single purchasable property tile on the MoneyPoly board."""
 
@@ -58,7 +60,8 @@ class Property:
         """
         if not self.is_mortgaged:
             return 0
-        cost = int(self.financials["mortgage"] * 1.1)
+        mortgage = self.financials["mortgage"]
+        cost = (mortgage * 11 + 9) // 10
         self.is_mortgaged = False
         return cost
 

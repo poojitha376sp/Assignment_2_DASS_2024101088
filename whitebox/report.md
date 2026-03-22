@@ -147,6 +147,10 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-58** | Empty Game Advance Turn | Advancing turns in an empty game should do nothing | **PASSED** (Fixed) |
 | **TC-59** | Empty Game Play Turn | Playing a turn in an empty game should do nothing | **PASSED** (Fixed) |
 | **TC-60** | Card Cleanup List Mutation | Removing one bankrupt player should not skip the next one | **PASSED** (Fixed) |
+| **TC-61** | Trade Menu Execution | The trade menu should complete a valid trade | **PASSED** (Fixed) |
+| **TC-62** | Jail Fine Bankruptcy Safety | Paying the jail fine should still eliminate a bankrupt player safely | **PASSED** |
+| **TC-63** | Property Unmortgage Rounding | Redemption cost should round up instead of down | **PASSED** (Fixed) |
+| **TC-64** | Game Unmortgage Rounding | Game-level redemption cost should also round up | **PASSED** (Fixed) |
 
 ### Errors & Logical Issues Corrected
 The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This section is kept short on purpose so it does not repeat the same information that is already shown in the test table and the commit log.
@@ -205,6 +209,10 @@ The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This se
 - **TC-54** checks that double rent returns only after the whole group is free of mortgages.
 - **TC-55** checks that mortgaging a property reduces the bank's cash reserves.
 - **TC-56** checks that a rejected mortgage attempt leaves the bank unchanged.
+- **TC-61** checks that the interactive trade menu actually performs a trade instead of acting like a stub.
+- **TC-62** checks the jail-fine bankruptcy path, because a player who goes bankrupt while paying to leave jail still needs to be cleaned up safely.
+- **TC-63** checks that mortgage redemption rounds up, because flooring the cost makes Park Place cheaper than intended.
+- **TC-64** checks the same rounding rule through the game-level unmortgage flow, so the menu and helper stay consistent.
 
 ### New Results Summary
 - TC-22 to TC-26 did not reveal new code errors.
@@ -221,9 +229,12 @@ The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This se
 - TC-56 passed and strengthens the mortgage no-op branch.
 - TC-57 to TC-59 revealed a real defect in empty-game safety and were fixed in the code.
 - TC-60 revealed a real defect in card cleanup list iteration and was fixed in the code.
+- TC-61 revealed a real defect in the interactive trade menu and was fixed in the code.
+- TC-62 passed and confirms jail-fine bankruptcy cleanup remains safe.
+- TC-63 and TC-64 revealed a real defect in mortgage redemption rounding and were fixed in the code.
 
 ### Error Fix Log
-This section ties the discovered issues to the tests that exposed them. Only **Errors #1 to #16** are code defects. The later commit `0434be9` is a documentation update that adds this audit trail; it is **not** a separate code error.
+This section ties the discovered issues to the tests that exposed them. Only **Errors #1 to #18** are code defects. The later commit `0434be9` is a documentation update that adds this audit trail; it is **not** a separate code error.
 
 | Error | What Was Wrong | Main Test Evidence | Commit |
 | :--- | :--- | :--- | :--- |
@@ -243,14 +254,18 @@ This section ties the discovered issues to the tests that exposed them. Only **E
 | **Error #14** | Mortgage payouts were not reducing bank reserves after the negative-collection safety change. | TC-55 | `4901369` - Error #14: Pay out bank funds when mortgaging property |
 | **Error #15** | Empty-game turn flow crashed instead of failing or no-oping safely. | TC-57 / TC-58 / TC-59 | `dc00daa` - Error #15: Guard empty-game turn flow |
 | **Error #16** | Removing bankrupt players during card cleanup could skip the next opponent because the player list was being mutated during iteration. | TC-60 | Documented in report summary |
+| **Error #17** | The interactive trade menu was still a placeholder and could not complete a trade. | TC-61 | Documented in report summary |
+| **Error #18** | Mortgage redemption used a floor operation, making some properties slightly too cheap to unmortgage. | TC-63 / TC-64 | Documented in report summary |
 
 ### Commit Notes
-- The white-box work now has 16 total error fixes documented across the report.
+- The white-box work now has 18 total error fixes documented across the report.
 - The `Error #8` to `Error #12` items also exist as Git commits with the required format.
 - `Error #13` is documented here and has a matching Git commit.
 - `Error #14` is documented here and has a matching Git commit.
 - `Error #15` is documented here and has a matching Git commit.
 - `Error #16` is documented here and has a matching Git commit.
+- `Error #17` is documented here and has a matching Git commit.
+- `Error #18` is documented here and has a matching Git commit.
 - No earlier report content was removed; this log only adds the missing audit trail.
 - Commit `0434be9` is a report-only update and should not be counted as `Error #12`.
 
