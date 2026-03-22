@@ -108,6 +108,11 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-19** | Community Chest: Birthday | Every opponent pays the active player | **PASSED** (Fixed) |
 | **TC-20** | Special: Free Parking | Landing on a harmless tile does nothing | **PASSED** |
 | **TC-21** | Property Ownership: Self-Land | No rent when landing on your own property | **PASSED** |
+| **TC-22** | Jail: Free Card | Consumes a jail-free card and releases the player | **PASSED** |
+| **TC-23** | Trade: Success | Valid property trade between two players | **PASSED** |
+| **TC-24** | Trade: Insufficient Cash | Trade fails when buyer cannot afford it | **PASSED** |
+| **TC-25** | Mortgage Cycle | Mortgage and unmortgage the same property | **PASSED** |
+| **TC-26** | Mortgage: Wrong Owner | Non-owner cannot mortgage property | **PASSED** |
 
 ### Errors & Logical Issues Corrected
 #### **Error #1: Jail Fine Missing Deduction**
@@ -143,6 +148,15 @@ Added support for `collect_from_all` and `birthday` cards so money moves correct
 - **TC-19** checks the Community Chest birthday card. It is similar to TC-18, but it follows a different card path, so it needs its own test.
 - **TC-20** checks a safe tile that should not change the game state. This confirms the code does nothing when it should do nothing.
 - **TC-21** checks that landing on your own property does not charge rent. This protects the self-ownership branch.
+- **TC-22** checks the jail-free card path, which is different from paying the fine or rolling doubles.
+- **TC-23** checks a normal successful trade so property ownership and cash both move correctly.
+- **TC-24** checks that a trade is rejected when the buyer has too little cash.
+- **TC-25** checks that a property can be mortgaged and later unmortgaged without breaking ownership.
+- **TC-26** checks that a player cannot mortgage a property they do not own.
+
+### New Results Summary
+- TC-22 to TC-26 did not reveal new code errors.
+- They were added to cover remaining branches and edge cases in jail handling, trading, and mortgage logic.
 
 ---
 
