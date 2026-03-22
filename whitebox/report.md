@@ -103,6 +103,7 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-14** | Bankruptcy: Elimination | Game removal on total failure | **PASSED** |
 | **TC-15** | **Super Workflow** | **Nodes 48-52 (Houses/Monopoly)**| **PASSED** |
 | **TC-16** | Special: Luxury Tax | Node 18b (Position 38) | **PASSED** |
+| **TC-17** | Purchase: Exact Balance | Buying is allowed when balance equals price | **PASSED** (Fixed) |
 
 ### Errors & Logical Issues Corrected
 #### **Error #1: Jail Fine Missing Deduction**
@@ -125,6 +126,12 @@ Added `_check_bankruptcy` rescue loop allowing mortgages.
 
 #### **Error #7: Missing House Building (Nodes 48-52)**
 Implemented `_menu_build` and Choice 7 in `interactive_menu`. 
+
+#### **Error #8: Exact-Balance Purchase Blocked**
+Changed the buy check so a player can buy a property when their money is exactly the same as the price.
+
+### Why the New Test Was Added
+- **TC-17** checks the edge case where a player has exactly enough money to buy a property. This matters because the code used to reject that case.
 
 ---
 

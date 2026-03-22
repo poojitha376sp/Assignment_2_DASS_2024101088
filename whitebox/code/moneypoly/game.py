@@ -137,7 +137,7 @@ class Game:
 
     def buy_property(self, player, prop):
         """Purchase `prop` on behalf of `player`."""
-        if player.balance <= prop.financials["price"]:
+        if player.balance < prop.financials["price"]:
             print(f"  {player.name} cannot afford {prop.name}.")
             return False
         player.deduct_money(prop.financials["price"])
