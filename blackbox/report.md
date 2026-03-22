@@ -6,6 +6,8 @@ This report documents the test case design, execution results, and bug reports f
 
 ## 1. Test Case Design
 
+The tables below list the named test cases; several of them expand into multiple parametrized checks in the automated suite.
+
 ### 1.1 Header & Security Validation
 Every request must include `X-Roll-Number`. User-scoped endpoints also require `X-User-ID`.
 
@@ -98,7 +100,16 @@ Testing system resilience against data-type violations and high-volume adversari
 | **STRS-04**| Large Payload | 2000+ char string | `400 / 413` | Prevents memory exhaustion / DoS via string overflow. |
 | **PREC-01**| Float Precision| `amount`: 0.0000001 | `400 Bad Request` | Verifies minimum financial transaction thresholds. |
 
----
+### 1.8 Additional Edge-Case Validation
+These extra tests were added to probe request-shape handling that was not covered by the original suite.
+
+| ID | Scenario [Type] | Input | Expected Output (Status / JSON / Data) | Justification & Importance |
+| :--- | :--- | :--- | :--- | :--- |
+| **EDGE-01** | Missing Product ID **[M]** | `POST /cart/add` without `product_id` | `400 Bad Request` | Confirms the API rejects incomplete cart requests. |
+| **EDGE-02** | Malformed JSON **[T]** | Broken JSON body for `/cart/add` | `400 Bad Request` | Confirms invalid JSON is rejected safely instead of being parsed loosely. |
+| **EDGE-03** | Missing Content-Type **[M]** | JSON body sent without `Content-Type` | `400 Bad Request` or `415 Unsupported Media Type` | Confirms the API enforces request format rather than accepting ambiguous payloads. |
+| **EDGE-04** | Float Phone Value **[T]** | `phone`: `123.45` | `400 Bad Request` | Confirms phone fields stay numeric-string only. |
+| **EDGE-05** | Float Review Rating **[T]** | `rating`: `4.5` | `400 Bad Request` | Confirms review ratings must be whole numbers. |
 
 ---
 
@@ -107,7 +118,7 @@ Testing system resilience against data-type violations and high-volume adversari
 The automated test suite was executed using Pytest and Requests against the live API at `http://localhost:8080`.
 
 ### 2.1 Verification Logic
-For every one of the 240+ scenarios, the framework automatically validates:
+For every scenario listed in the design tables, the framework automatically validates:
 1.  **Status Codes**: Exact match against expected (e.g., 400 for structural, 403 for auth).
 2.  **JSON Structure**: Presence/format of mandatory fields (e.g., verifying `total` in cart).
 3.  **Data Correctness**: Numerical accuracy and business logic consistency.
@@ -122,188 +133,92 @@ For every one of the 240+ scenarios, the framework automatically validates:
 | Product Catalog | 50 | 47 | 3 | 94% |
 | Cart & Checkout | 50 | 43 | 7 | 86% |
 | Others (Fuzzing/REV) | 60 | 54 | 6 | 90% |
-| **Total** | **240** | **211** | **29** | **88%** |
+| Additional Edge Cases | 5 | 3 | 2 | 60% |
+| **Total** | **245** | **214** | **31** | **87%** |
+
+The execution summary above reflects the last full Pytest run captured before the later requirement-matrix additions. Subsequent focused regressions found additional bugs and expanded the current test inventory.
 
 ---
 
 ## 3. Bug Reports
 
-### BUG-01: Cart Quantity Validation Failure
-- **Endpoint**: `POST /api/v1/cart/add`
-- **Payload**: `{"product_id": 1, "quantity": 0}`
-- **Expected Result**: `400 Bad Request` (min quantity 1).
-- **Actual Result**: `200 OK` (Accepted zero-item addition).
+Each bug entry below is written in a strict request format so it can be reproduced directly from the report. The current report documents 45 unique bugs.
 
-### BUG-02: Incorrect Status Code for Missing Product
-- **Endpoint**: `GET /api/v1/products/999999`
-- **Expected Result**: `404 Not Found`.
-- **Actual Result**: `400 Bad Request`.
-
-### BUG-03: Profile Update Schema Mismatch (Missing Name)
-- **Endpoint**: `PUT /api/v1/profile`
-- **Payload**: `{"name": "NewName", "phone": "1234567890"}`
-- **Expected Result**: Response JSON contains `name`.
-- **Actual Result**: `name` field is missing from response.
-
-### BUG-04: Address Creation Schema Mismatch (Missing ID)
-- **Endpoint**: `POST /api/v1/addresses`
-- **Payload**: `{"label": "HOME", ...}`
-- **Expected Result**: Response JSON contains `address_id`.
-- **Actual Result**: `address_id` is missing.
-
-### BUG-05: Illegal State Transition for Tickets
-- **Endpoint**: `PUT /api/v1/support/tickets/{id}`
-- **Payload**: `{"status": "CLOSED"}` (from OPEN)
-- **Expected Result**: `400 Bad Request` (must skip to IN_PROGRESS).
-- **Actual Result**: `200 OK`.
-
-### BUG-06: Inconsistent Authentication Requirements
-- **Endpoint**: `GET /api/v1/products?sort=price_asc`
-- **Expected Result**: Public access (headers optional as per base route).
-- **Actual Result**: Requires `X-User-ID` only when sorting is applied.
-
-### BUG-07: Admin Product Schema Mismatch (Missing Stock)
-- **Endpoint**: `GET /api/v1/admin/products`
-- **Expected Result**: Product objects include `stock` field.
-- **Actual Result**: `stock` field is missing.
-
-### BUG-08: Invoice Schema Mismatch (Missing GST)
-- **Endpoint**: `GET /api/v1/orders/{id}/invoice`
-- **Expected Result**: Invoice JSON shows `gst` amount.
-- **Actual Result**: `gst` field is missing.
-
-### BUG-09: Cart Add Response Schema Mismatch
-- **Endpoint**: `POST /api/v1/cart/add`
-- **Payload**: `{"product_id": 1, "quantity": 1}`
-- **Expected Result**: Full cart state (`items`, `total`) returned in response.
-- **Actual Result**: Only `{"message": "Success"}` is returned.
-
-### BUG-10: Admin Coupons Schema Mismatch
-- **Endpoint**: `GET /api/v1/admin/coupons`
-- **Expected Result**: List of coupons with their `code` field.
-- **Actual Result**: `code` field is missing, preventing coupon auditing.
-
-### BUG-11: Data Validation Failure (Alphanumeric Pincode)
-- **Endpoint**: `POST /api/v1/addresses`
-- **Payload**: `{"label": "HOME", ..., "pincode": "123A56"}`
-- **Expected Result**: `400 Bad Request` (digit-only validation).
-- **Actual Result**: `200 OK` (Accepted alphanumeric string).
-
-### BUG-12: Ticket Immutability Violation
-- **Endpoint**: `PUT /api/v1/support/tickets/{id}`
-- **Payload**: `{"status": "OPEN"}` (applied to a CLOSED ticket)
-- **Expected Result**: `400 Bad Request` (closed tickets must be immutable).
-- **Actual Result**: `200 OK` (Ticket reopened against business rules).
-
-### BUG-13: Persistent Data Validation Failure (Address Update)
-- **Endpoint**: `PUT /api/v1/addresses/{id}`
-- **Payload**: `{"pincode": "ABCDEF"}`
-- **Expected Result**: `400 Bad Request`.
-- **Actual Result**: `200 OK` (Update logic lacks validation).
-
-### BUG-14: Lack of Cancellation State Guard
-- **Endpoint**: `POST /api/v1/orders/{id}/cancel`
-- **Expected Result**: `400 Bad Request` if status is already `CANCELLED`.
-- **Actual Result**: `200 OK` (Allows redundant cancellation operations).
-
-### BUG-15: Critical Security Vulnerability (Broken Access Control)
-- **Endpoint**: `PUT /api/v1/support/tickets/{id}`
-- **Payload**: `{"status": "IN_PROGRESS"}` (sent by User A for User B's ticket)
-- **Expected Result**: `403 Forbidden`.
-- **Actual Result**: `200 OK` (User can update other users' tickets).
-
-### BUG-16: API Crash on Review Average Calculation
-- **Endpoint**: `GET /api/v1/reviews/average?product_id=1`
-- **Pre-condition**: Multiple reviews exist for a single product.
-- **Expected Result**: `200 OK` with JSON average.
-- **Actual Result**: `500 Internal Server Error`.
-
-### BUG-17: Authentication Leak (Missing User Scoping)
-- **Endpoint**: `GET /api/v1/wallet/balance`
-- **Headers**: Missing `X-User-ID`.
-- **Expected Result**: `400 Bad Request`.
-- **Actual Result**: `200 OK` (Leaks balance data anonymously).
-
-### BUG-18: Critical Financial Logic Error (Total Zero)
-- **Endpoint**: `GET /api/v1/orders/{id}/invoice`
-- **Expected Result**: `total` field must correctly sum products and GST.
-- **Actual Result**: `total` is consistently returned as `0`.
-
-### BUG-19: GST Calculation Precision Error
-- **Endpoint**: `GET /api/v1/orders/{id}/invoice`
-- **Expected Result**: `gst` must be exactly 5% of subtotal ($5 on $100).
-- **Actual Result**: `gst` is consistently returned as `0`.
-
-### BUG-20: Data Type Validation Failure (Null Values)
-- **Endpoint**: `POST /api/v1/cart/add`
-- **Payload**: `{"product_id": 1, "quantity": null}`
-- **Expected Result**: `400 Bad Request` (strict integer check).
-- **Actual Result**: `200 OK` (Accepted null quantity).
-
-### BUG-21: Inactive Product Visibility Breach
-- **Endpoint**: `GET /api/v1/products/{id}`
-- **ID**: [ID of a product where active=False]
-- **Expected Result**: `404 Not Found`.
-- **Actual Result**: `200 OK` (User can still fetch internal details via direct ID).
-
-### BUG-22: Review Logic Violation (Unordered Products)
-- **Endpoint**: `POST /api/v1/reviews`
-- **Payload**: `{"product_id": 1, "rating": 5, "comment": "Nice!"}`
-- **Pre-condition**: User has NOT ordered product 1.
-- **Expected Result**: `400 Bad Request`.
-- **Actual Result**: `200 OK` (Allows fraudulent reviews).
-
-### BUG-23: Review Logic Violation (Duplicate Reviews)
-- **Endpoint**: `POST /api/v1/reviews`
-- **Payload**: User A reviews Product 1 for the second time.
-- **Expected Result**: `400 Bad Request`.
-- **Actual Result**: `200 OK` (Allows spamming multiple reviews per product).
-
-### BUG-24: Financial Invariant Violation (Impossible Coupons)
-- **Endpoint**: `POST /api/v1/admin/coupons`
-- **Payload**: `{"code": "FREE", "discount_type": "PERCENTAGE", "discount_value": 110}`
-- **Expected Result**: `400 Bad Request`.
-- **Actual Result**: `200 OK` (Accepted >100% discount).
-
-### BUG-25: Routing / Parsing Crash (Review Rating)
-- **Endpoint**: `POST /api/v1/reviews`
-- **Payload**: `{"rating": "--", ...}`
-- **Expected Result**: `400 Bad Request`.
-- **Actual Result**: `404 Not Found` (Parser confuses data for a non-existent route).
-
-### BUG-26: Business Logic Failure (Coupon Recycling)
-- **Endpoint**: `POST /api/v1/coupon/apply`
-- **Scenario**: Apply "one-time" coupon, then cancel the resulting order.
-- **Expected Result**: Coupon should be restored for reuse.
-- **Actual Result**: `400 Bad Request` (Permanently consumed).
-
-### BUG-27: Admin Logic Failure (Negative Price)
-- **Endpoint**: `PUT /api/v1/admin/products/{id}`
-- **Payload**: `{"price": -100}`
-- **Expected Result**: `400 Bad Request`.
-- **Actual Result**: `200 OK`.
-
-### BUG-28: Admin Logic Failure (Negative Stock)
-- **Endpoint**: `PUT /api/v1/admin/products/{id}`
-- **Payload**: `{"stock": -50}`
-- **Expected Result**: `400 Bad Request`.
-- **Actual Result**: `200 OK`.
-
-### BUG-29: Critical Security Vulnerability (Privilege Escalation)
-- **Endpoint**: `GET /api/v1/admin/users`
-- **Headers**: Request sent by regular User ID (X-User-ID: 1).
-- **Expected Result**: `403 Forbidden` (or 401).
-- **Actual Result**: `200 OK` (Admin data leaked to regular users).
+| ID | Method | Full URL | Headers | Body | Expected Result | Actual Result |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **BUG-01** | `POST` | `http://localhost:8080/api/v1/cart/add` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"product_id": 1, "quantity": 0}` | `400 Bad Request` (min quantity 1) | `200 OK` (Accepted zero-item addition) |
+| **BUG-02** | `GET` | `http://localhost:8080/api/v1/products/999999` | `X-Roll-Number: 2024101088`, `Content-Type: application/json` | None | `404 Not Found` | `400 Bad Request` |
+| **BUG-03** | `PUT` | `http://localhost:8080/api/v1/profile` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"name": "NewName", "phone": "1234567890"}` | Response JSON contains `name` | `name` field is missing from response |
+| **BUG-04** | `POST` | `http://localhost:8080/api/v1/addresses` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"label": "HOME", ...}` | Response JSON contains `address_id` | `address_id` is missing |
+| **BUG-05** | `PUT` | `http://localhost:8080/api/v1/support/tickets/{id}` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"status": "CLOSED"}` (from OPEN) | `400 Bad Request` (must skip to IN_PROGRESS) | `200 OK` |
+| **BUG-06** | `GET` | `http://localhost:8080/api/v1/products?sort=price_asc` | `X-Roll-Number: 2024101088`, `Content-Type: application/json`; `X-User-ID` omitted in the failing run | None | Public access (headers optional as per base route) | Requires `X-User-ID` only when sorting is applied |
+| **BUG-07** | `GET` | `http://localhost:8080/api/v1/admin/products` | `X-Roll-Number: 2024101088`, `Content-Type: application/json` | None | Product objects include `stock` field | `stock` field is missing |
+| **BUG-08** | `GET` | `http://localhost:8080/api/v1/orders/{id}/invoice` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | None | Invoice JSON shows `gst` amount | `gst` field is missing |
+| **BUG-09** | `POST` | `http://localhost:8080/api/v1/cart/add` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"product_id": 1, "quantity": 1}` | Full cart state (`items`, `total`) returned in response | Only `{"message": "Success"}` is returned |
+| **BUG-10** | `GET` | `http://localhost:8080/api/v1/admin/coupons` | `X-Roll-Number: 2024101088`, `Content-Type: application/json` | None | List of coupons with their `code` field | `code` field is missing, preventing coupon auditing |
+| **BUG-11** | `POST` | `http://localhost:8080/api/v1/addresses` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"label": "HOME", ..., "pincode": "123A56"}` | `400 Bad Request` (digit-only validation) | `200 OK` (Accepted alphanumeric string) |
+| **BUG-12** | `PUT` | `http://localhost:8080/api/v1/support/tickets/{id}` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"status": "OPEN"}` (applied to a CLOSED ticket) | `400 Bad Request` (closed tickets must be immutable) | `200 OK` (Ticket reopened against business rules) |
+| **BUG-13** | `PUT` | `http://localhost:8080/api/v1/addresses/{id}` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"pincode": "ABCDEF"}` | `400 Bad Request` | `200 OK` (Update logic lacks validation) |
+| **BUG-14** | `POST` | `http://localhost:8080/api/v1/orders/{id}/cancel` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | None | `400 Bad Request` if status is already `CANCELLED` | `200 OK` (Allows redundant cancellation operations) |
+| **BUG-15** | `PUT` | `http://localhost:8080/api/v1/support/tickets/{id}` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"status": "IN_PROGRESS"}` (sent by User A for User B's ticket) | `403 Forbidden` | `200 OK` (User can update other users' tickets) |
+| **BUG-16** | `GET` | `http://localhost:8080/api/v1/reviews/average?product_id=1` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | None | `200 OK` with JSON average | `500 Internal Server Error` |
+| **BUG-17** | `GET` | `http://localhost:8080/api/v1/wallet/balance` | `X-Roll-Number: 2024101088`; `X-User-ID` missing | None | `400 Bad Request` | `200 OK` (Leaks balance data anonymously) |
+| **BUG-18** | `GET` | `http://localhost:8080/api/v1/orders/{id}/invoice` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | None | `total` field must correctly sum products and GST | `total` is consistently returned as `0` |
+| **BUG-19** | `GET` | `http://localhost:8080/api/v1/orders/{id}/invoice` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | None | `gst` must be exactly 5% of subtotal ($5 on $100) | `gst` is consistently returned as `0` |
+| **BUG-20** | `POST` | `http://localhost:8080/api/v1/cart/add` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"product_id": 1, "quantity": null}` | `400 Bad Request` (strict integer check) | `200 OK` (Accepted null quantity) |
+| **BUG-21** | `GET` | `http://localhost:8080/api/v1/products/{inactive_product_id}` | `X-Roll-Number: 2024101088`, `Content-Type: application/json` | None | `404 Not Found` | `200 OK` (User can still fetch internal details via direct ID) |
+| **BUG-22** | `POST` | `http://localhost:8080/api/v1/reviews` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"product_id": 1, "rating": 5, "comment": "Nice!"}` | `400 Bad Request` | `200 OK` (Allows fraudulent reviews) |
+| **BUG-23** | `POST` | `http://localhost:8080/api/v1/reviews` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | Same review submitted by User A for Product 1 again | `400 Bad Request` | `200 OK` (Allows spamming multiple reviews per product) |
+| **BUG-24** | `POST` | `http://localhost:8080/api/v1/admin/coupons` | `X-Roll-Number: 2024101088`, `Content-Type: application/json` | `{"code": "FREE", "discount_type": "PERCENTAGE", "discount_value": 110}` | `400 Bad Request` | `200 OK` (Accepted >100% discount) |
+| **BUG-25** | `POST` | `http://localhost:8080/api/v1/reviews` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"rating": "--", ...}` | `400 Bad Request` | `404 Not Found` (Parser confuses data for a non-existent route) |
+| **BUG-26** | `POST` | `http://localhost:8080/api/v1/coupon/apply` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | Apply "one-time" coupon, then cancel the resulting order | Coupon should be restored for reuse | `400 Bad Request` (Permanently consumed) |
+| **BUG-27** | `PUT` | `http://localhost:8080/api/v1/admin/products/{id}` | `X-Roll-Number: 2024101088`, `Content-Type: application/json` | `{"price": -100}` | `400 Bad Request` | `200 OK` |
+| **BUG-28** | `PUT` | `http://localhost:8080/api/v1/admin/products/{id}` | `X-Roll-Number: 2024101088`, `Content-Type: application/json` | `{"stock": -50}` | `400 Bad Request` | `200 OK` |
+| **BUG-29** | `GET` | `http://localhost:8080/api/v1/admin/users` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | None | `403 Forbidden` (or 401) | `200 OK` (Admin data leaked to regular users) |
+| **BUG-30** | `POST` | `http://localhost:8080/api/v1/cart/add` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"quantity": 1}` | `400 Bad Request` (missing `product_id`) | `404 Not Found` |
+| **BUG-31** | `POST` | `http://localhost:8080/api/v1/cart/add` | `X-Roll-Number: 2024101088`, `X-User-ID: 1` | `{"product_id": 1, "quantity": 1}` | `400 Bad Request` or `415 Unsupported Media Type` when `Content-Type` is missing | `200 OK` (accepted without JSON content type) |
+| **BUG-32** | `POST` | `http://localhost:8080/api/v1/orders/{id}/cancel` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | Cancel an order after reducing inventory by one item | Cancelled order should restore product stock | `Stock remains reduced` (inventory is not recovered after cancellation) |
+| **BUG-33** | `POST` | `http://localhost:8080/api/v1/wallet/add` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"amount": 0.0001}` / `{"amount": 123}` / `{"amount": 12.5}` | `400 Bad Request` | `200 OK` (accepted fuzzed top-up amounts that should be rejected) |
+| **BUG-34** | `POST` | `http://localhost:8080/api/v1/orders/{id}/cancel` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | Cancel a known DELIVERED order | `400 Bad Request` | `404 Not Found` (delivered orders are treated as missing) |
+| **BUG-35** | `PUT` | `http://localhost:8080/api/v1/addresses/{id}` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"city": "New City"}` / `{"pincode": "999999"}` / `{"label": "OFFICE"}` | `400 Bad Request` | `200 OK` (forbidden fields are silently ignored instead of being rejected) |
+| **BUG-36** | `POST` | `http://localhost:8080/api/v1/coupon/remove` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"code": "INVALID_CODE"}` | `400 Bad Request` | `200 OK` (invalid coupon codes are removed successfully) |
+| **BUG-37** | `POST` | `http://localhost:8080/api/v1/cart/update` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"product_id": 1, "quantity": 1000000}` | `400 Bad Request` (quantity cannot exceed stock) | `200 OK` (cart accepts excessive quantities) |
+| **BUG-38** | `POST` | `http://localhost:8080/api/v1/cart/update` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"product_id": 99999999, "quantity": 1}` | `404 Not Found` | `200 OK` (cart update accepts nonexistent products) |
+| **BUG-39** | `GET` | `http://localhost:8080/api/v1/orders/{id}/invoice` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | Read invoice after a normal checkout | `subtotal + GST = total`, and invoice total must match checkout total | `invoice total_amount differs from checkout total_amount` |
+| **BUG-40** | `GET` | `http://localhost:8080/api/v1/cart` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | Read cart after adding one item | `total` equals the sum of item subtotals | `total` is returned as `0` even when item subtotal is non-zero |
+| **BUG-41** | `POST` | `http://localhost:8080/api/v1/addresses` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | Add a new address with `is_default: true` after existing defaults are cleared | Exactly one address should remain default | Multiple addresses remain default after creation |
+| **BUG-42** | `POST` | `http://localhost:8080/api/v1/cart/add` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"product_id": 1, "quantity": 2}` | Item subtotal should equal `quantity x unit_price` | `subtotal` is returned as `-16` instead of `240` |
+| **BUG-43** | `GET` | `http://localhost:8080/api/v1/products/{product_id}/reviews` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | Read reviews after posting ratings 5 and 4 | `average_rating` should be `4.5` | `average_rating` is returned as `4` |
+| **BUG-44** | `PUT` | `http://localhost:8080/api/v1/support/tickets/{ticket_id}` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | Reopen a ticket after it was moved to `CLOSED` | `400 Bad Request` | `200 OK` (closed tickets can be reopened) |
+| **BUG-45** | `POST` | `http://localhost:8080/api/v1/cart/update` | `X-Roll-Number: 2024101088`, `X-User-ID: 1`, `Content-Type: application/json` | `{"quantity": 1}` | `400 Bad Request` (missing `product_id`) | `200 OK` (missing product_id is accepted as a valid update) |
 
 ---
 
-## 4. Test File Inventory
-The automated suite consists of 23 test modules totaling **177 high-level test functions**, covering over **240 logic scenarios** via parametrization.
+## 4. Coverage Matrix
+The table below maps the QuickCart specification areas to the test modules that exercise them.
+
+| Spec Area | Main Test Modules | Coverage Note |
+| :--- | :--- | :--- |
+| Headers & Security | `test_security.py`, `test_final_sec.py`, `test_deep_dive_7.py`, `test_additional_edge_cases.py` | Covers required headers, missing IDs, admin access, and anonymous access checks. |
+| Profile | `test_profile.py`, `test_massive.py` | Covers name/phone validation, type safety, and update response checks. |
+| Addresses | `test_addresses.py`, `test_deep_dive_4.py`, `test_deep_dive_5.py` | Covers label, pincode, invalid updates, and default-address behavior. |
+| Products | `test_products.py`, `test_massive.py`, `test_deep_dive_8.py` | Covers active-only listing, lookups, filtering, sorting, and inactive-product visibility. |
+| Cart | `test_cart.py`, `test_massive.py`, `test_additional_edge_cases.py`, `test_requirement_matrix.py` | Covers add/clear behavior, quantity validation, missing fields, update, and remove flows. |
+| Coupons | `test_checkout.py`, `test_deep_dive_3.py`, `test_deep_dive_9.py`, `test_requirement_matrix.py` | Covers coupon apply rules, caps, reuse cases, and coupon removal. |
+| Checkout | `test_checkout.py`, `test_deep_dive_5.py`, `test_deep_dive_7.py`, `test_deep_dive_9.py` | Covers payment method validation, empty-cart behavior, tax math, and checkout duplication. |
+| Wallet & Loyalty | `test_wallet_loyalty.py`, `test_massive.py`, `test_requirement_matrix.py` | Covers top-up limits, pay limits, balance visibility, and exact balance changes. |
+| Orders | `test_orders.py`, `test_deep_dive_3.py`, `test_deep_dive_5.py`, `test_deep_dive_7.py`, `test_deep_dive_9.py`, `test_requirement_matrix.py` | Covers order listing, invoices, cancellation, stock recovery, and missing-order handling. |
+| Reviews | `test_reviews.py`, `test_deep_dive_6.py`, `test_deep_dive_8.py`, `test_massive.py`, `test_additional_edge_cases.py`, `test_requirement_matrix.py` | Covers rating bounds, comment bounds, averages, and review permission issues. |
+| Support Tickets | `test_support.py`, `test_deep_dive_4.py`, `test_deep_dive_6.py`, `test_requirement_matrix.py` | Covers subject/message validation, update transitions, and ticket creation response shape. |
+| Admin Inspection | `test_admin.py`, `test_final_sec.py`, `test_deep_dive_7.py`, `test_requirement_matrix.py` | Covers users, orders, carts, addresses, coupons, tickets, and products endpoints. |
+
+## 5. Test File Inventory
+The automated suite consists of 25 test modules totaling **103 high-level test functions**, with additional parametrized variations inside several files.
 
 | Test File | Test Count | Prime Focus |
 | :--- | :--- | :--- |
-| `test_massive.py` | 108 | High-volume Input Fuzzing |
-| `test_deep_dive_1-9.py`| 34 | Complex Logic & State Machines |
+| `test_massive.py` | 8 | High-volume Input Fuzzing |
+| `test_deep_dive_1.py ... test_deep_dive_9.py` | 32 | Complex Logic & State Machines |
 | `test_fuzzing.py` | 4 | Initial Type Safety & Guardrails |
 | `test_security.py` | 3 | Header Integrity & Authentication |
 | `test_addresses.py` | 3 | Label Enums & Pincode Logic |
@@ -317,4 +232,6 @@ The automated suite consists of 23 test modules totaling **177 high-level test f
 | `test_admin.py` | 2 | Administrative Catalog Control |
 | `test_final_sec.py` | 2 | Privilege Escalation Probes |
 | `test_support.py` | 2 | Ticket Lifecycle & Transitions |
-| **Total** | **177** | **Exhaustive coverage** |
+| `test_additional_edge_cases.py` | 5 | Request-Shape Edge Cases |
+| `test_requirement_matrix.py` | 21 | Spec Coverage Gaps |
+| **Total** | **103** | **Exhaustive coverage** |

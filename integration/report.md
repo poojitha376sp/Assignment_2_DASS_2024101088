@@ -2,7 +2,22 @@
 
 This report documents the design, implementation, and integration testing of the StreetRace Manager system.
 
+In simple terms, the goal of this part is to prove that the modules work together correctly, not just that each module works by itself.
+
 ---
+
+## Requirement Coverage
+
+This section maps the assignment requirements to the test groups used in this report.
+
+| Assignment requirement | Covered by test groups |
+| :--- | :--- |
+| Register a driver and then enter the driver into a race | Group A and Group B |
+| Attempt to enter a race without a registered driver | Group A and Group B |
+| Complete a race and verify results plus prize money update the inventory | Group C, Group D, and Group E |
+| Assign a mission and ensure the correct crew roles are validated | Group F and Group G |
+| Verify tuning, sponsorship, and trophy interactions | Group H, Group I, and Group J |
+| Check full end-to-end module interaction across the controller | Group J |
 
 ## 2.1 Call Graph (Logic Design)
 The system is designed with a **Controller-Service** architecture. The `StreetRaceManager` acts as the central hub (Controller), invoking methods across **9 specialized modules** (Services). The complete node-by-node atlas is in `diagrams/call_graph_atlas.md`.
@@ -188,9 +203,9 @@ The following **65 test cases** validate how different modules interact with one
 ---
 
 ## 2.3 Additional Modules (Bonus)
-1.  **Vehicle Tuning Module**: Integrates with Crew (Mechanic check) and Inventory (Resources) to improve car stats permanently.
-2.  **Sponsorships Module**: Integrates with Results (Win event) and Inventory (Payouts) to provide revenue bonuses.
-3.  **Trophy Room Module**: Integrates with Results (Win event) to store team achievements and medals.
+1.  **Vehicle Tuning Module**: Upgrades a car's speed or handling when a registered mechanic has enough parts and cash.
+2.  **Sponsorships Module**: Stores sponsor deals and pays a bonus into Inventory when a sponsored race is won.
+3.  **Trophy Room Module**: Saves race trophies when a first-place result is recorded.
 
 ---
 
@@ -201,6 +216,8 @@ All **65 Integration Test Cases** passed 100% using `pytest`. No logical issues 
 pytest integration/tests/test_integration.py -v
 65 passed in 0.12s
 ```
+
+Final verdict: All 65 integration tests passed and all required module interactions were verified.
 
 ---
 

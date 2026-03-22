@@ -1,6 +1,6 @@
 """
 StreetRace Manager - Central Controller
-The "Integration Layer" coordinating all 8 modules.
+The "Integration Layer" coordinating all 9 modules.
 """
 
 from integration.code.registration import RegistrationModule
