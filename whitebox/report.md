@@ -219,14 +219,14 @@ This section ties the discovered issues to the tests that exposed them. Only **E
 | **Error #12** | Card payments did not remove players who went bankrupt from the game. | TC-51 / TC-52 | `ef73b6a` - Error #12: Handle bankrupt opponents from card payments |
 | **Error #13** | Monopoly rent still doubled even when one property in the set was mortgaged. | TC-53 / TC-54 | `a1ed3f5` - Error #13: Block monopoly rent when any property is mortgaged |
 | **Error #14** | Mortgage payouts were not reducing bank reserves after the negative-collection safety change. | TC-55 | `4901369` - Error #14: Pay out bank funds when mortgaging property |
-| **Error #15** | Empty-game turn flow crashed instead of failing or no-oping safely. | TC-57 / TC-58 / TC-59 | `pending` - Error #15: Guard empty-game turn flow |
+| **Error #15** | Empty-game turn flow crashed instead of failing or no-oping safely. | TC-57 / TC-58 / TC-59 | `dc00daa` - Error #15: Guard empty-game turn flow |
 
 ### Commit Notes
 - The white-box work now has 15 total error fixes documented across the report.
 - The `Error #8` to `Error #12` items also exist as Git commits with the required format.
 - `Error #13` is documented here and has a matching Git commit.
 - `Error #14` is documented here and has a matching Git commit.
-- `Error #15` is documented here and needs its commit recorded after the fix is saved.
+- `Error #15` is documented here and has a matching Git commit.
 - No earlier report content was removed; this log only adds the missing audit trail.
 - Commit `0434be9` is a report-only update and should not be counted as `Error #12`.
 
