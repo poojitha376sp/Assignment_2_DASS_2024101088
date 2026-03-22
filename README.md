@@ -1,70 +1,269 @@
 # DASS Assignment 2 - Software Testing (2024101088)
 
-Consolidated repository for White Box, Integration, and Black Box API testing.
+This repository contains the complete submission for Assignment 2:
+
+1. White box testing for MoneyPoly
+2. Integration testing for StreetRace Manager
+3. Black box API testing for QuickCart
 
 **Git Repository**: [https://github.com/poojitha376sp/Assignment_2_DASS_2024101088.git](https://github.com/poojitha376sp/Assignment_2_DASS_2024101088.git)
 
 ---
 
-## 🚀 How to Run the Tests
+## Repository Layout
 
-### **1. Part 1: White Box Testing (MoneyPoly)**
-Ensure you are in the project root and have the dependencies installed.
+- `whitebox/` - MoneyPoly source, tests, report, and diagrams
+- `integration/` - StreetRace Manager source, tests, and report
+- `blackbox/` - QuickCart API tests and report
+- `README.md` - this top-level run guide for the whole assignment
 
-**Pylint (Source Quality)**
+---
+
+## Prerequisites
+
+You only need a standard Python environment plus Docker for the black-box part.
+
+Recommended versions:
+
+- Python 3.12 or newer
+- `pip`
+- `pytest`
+- `pylint`
+- `requests`
+- Docker Desktop or Docker Engine for QuickCart
+
+If you are setting up a fresh environment, the following commands are enough:
+
 ```bash
-export PYTHONPATH=$PYTHONPATH:$(pwd)/whitebox/code/
-pylint whitebox/code/moneypoly/
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install pytest pylint requests
 ```
-*Current Rating: 10.00/10*
 
-**Pytest (Statement/Branch Coverage)**
+If your machine already has the packages installed, you can skip the virtual environment and use your existing Python setup.
+
+---
+
+## How To Run Everything
+
+The safest way to verify the whole assignment is to run the three parts in this order:
+
+1. White box tests and linting
+2. Integration tests
+3. Black box API tests
+
+This order is useful because the white-box part is the most code-heavy and gives immediate feedback about the MoneyPoly logic and report.
+
+---
+
+## Part 1 - White Box Testing for MoneyPoly
+
+This part lives in `whitebox/` and contains:
+
+- `whitebox/code/moneypoly/` - the MoneyPoly game engine
+- `whitebox/tests/` - pytest-based white-box test batches
+- `whitebox/report.md` - the detailed report with test cases, errors, commits, and explanations
+
+### 1. Enter the whitebox folder
+
 ```bash
-export PYTHONPATH=$PYTHONPATH:$(pwd)/whitebox/code/
-pytest whitebox/tests/
+cd whitebox
 ```
 
-### **2. Part 2: Integration Testing (StreetRace Manager)**
-Build and verify the internal logic of the StreetRace Manager.
+### 2. Set the import path
 
-**Pytest (Cross-Module Integration)**
+The tests import the local `moneypoly` package directly from `whitebox/code`, so `PYTHONPATH` must point there.
+
 ```bash
-export PYTHONPATH=$PYTHONPATH:$(pwd)
-pytest integration/tests/
+export PYTHONPATH="$PWD/code"
 ```
 
-### **3. Part 3: Black Box API Testing (QuickCart)**
-The server must be running (Docker) before execution.
+If you are running only one command, you can also prefix it inline:
 
-**Start Server**
+```bash
+PYTHONPATH=code pytest -q tests
+```
+
+### 3. Run all white-box tests
+
+```bash
+PYTHONPATH=code pytest -q tests
+```
+
+This runs every MoneyPoly white-box batch, including the latest regression tests.
+
+### 4. Run a specific white-box batch
+
+If you want to verify one area only, run the corresponding file directly.
+
+Examples:
+
+```bash
+PYTHONPATH=code pytest -q tests/test_moneypoly.py
+PYTHONPATH=code pytest -q tests/test_moneypoly_batch17.py
+```
+
+### 5. Run linting on the MoneyPoly source
+
+```bash
+PYTHONPATH=code pylint code/moneypoly/
+```
+
+The goal of the white-box part is not only to pass tests, but also to keep the game engine readable, structured, and stable under edge-case inputs.
+
+### White-box focus areas
+
+The report and tests cover:
+
+- movement and Go salary handling
+- jail logic and jail card behavior
+- property purchase, trade, mortgage, and unmortgage flows
+- rent and monopoly rent rules
+- bankruptcy cleanup
+- card-driven state changes
+- board and bank helper functions
+- empty-game and boundary safety
+
+---
+
+## Part 2 - Integration Testing for StreetRace Manager
+
+This part lives in `integration/` and checks that the modules work together correctly.
+
+### 1. Enter the integration folder
+
+```bash
+cd integration
+```
+
+### 2. Set the import path
+
+The integration tests expect the project root to be importable.
+
+```bash
+export PYTHONPATH="$PWD/.."
+```
+
+### 3. Run all integration tests
+
+```bash
+PYTHONPATH=.. pytest -q tests
+```
+
+### Integration focus areas
+
+The integration work verifies that cross-module state updates stay consistent, for example:
+
+- registration feeding the crew and inventory modules
+- race results updating money and outcomes correctly
+- missions depending on the correct crew roles
+- trophies and sponsorship logic staying in sync with race events
+
+The matching documentation for this part is in `integration/report.md`.
+
+---
+
+## Part 3 - Black Box API Testing for QuickCart
+
+This part lives in `blackbox/` and tests the API exactly as a client would use it.
+
+### 1. Start the QuickCart server
+
+The API tests need the backend running first.
+
 ```bash
 docker load -i quickcart_image.tar
 docker run -d -p 8080:8080 --name quickcart quickcart
 ```
 
-**Run Automated API Tests**
+If the container already exists, stop or remove it before creating a new one.
+
+### 2. Run the API tests
+
 ```bash
-pytest blackbox/tests/
+cd blackbox
+pytest -q tests
 ```
 
+### 3. Stop the container when finished
+
+```bash
+docker stop quickcart
+docker rm quickcart
+```
+
+### Black-box focus areas
+
+The API suite checks:
+
+- valid and invalid request payloads
+- header handling such as `X-Roll-Number` and `X-User-ID`
+- boundary conditions
+- authorization and privilege checks
+- schema correctness and error responses
+
+The matching documentation for this part is in `blackbox/report.md`.
+
 ---
 
-## 🛠️ Methodology & Implementation Details
+## Suggested Full Verification Sequence
 
-### **Part 1: White Box Testing (MoneyPoly)**
-1.  **CFG Analysis (Node-by-Node)**: I mapped 78 logical statements defining the entire game engine. This included identifying missing logic for Monopoly house-building (Nodes 48-52 in the design) and implementing it to reach 100% coverage.
-2.  **Iterative Pylint Refactoring**: I performed atomic commits for each quality improvement. Starting from ~8/10, I refactored missing docstrings, unused imports, and complex logic flow to achieve a perfect 10.00/10 rating.
-3.  **Logical Bug Hunting**: Each test case was designed to trigger specific CFG branches. This revealed 7 critical logical errors (e.g., missing rent transfers, incorrect Go salary boundaries), which were fixed and committed individually.
+If you want one clean end-to-end run, use this sequence from the repository root:
 
-### **Part 2: Integration Testing (StreetRace Manager)**
-1.  **Modular 9-Component Design**: I implemented 6 mandatory modules (Registration, Crew, Inventory, Race, Results, Missions) and 3 bonus modules (**Vehicle Tuning**, **Sponsorships**, and **Trophy Room**).
-2.  **Cross-Module Dependency Logic**: The system enforces strict business rules (e.g., race results automatically updating inventory cash, missions requiring specific crew roles).
-3.  **Integration Suite**: Created 7 test scenarios in Pytest that verify complex multi-module flows (e.g., winning a race triggers a sponsorship bonus and updates bank balance).
+```bash
+source .venv/bin/activate
 
-### **Part 3: Black Box API Testing (QuickCart)**
-1.  **Scenario Design**: I designed 240+ test scenarios based strictly on the API documentation, covering valid/invalid inputs, header security, and boundary values.
-2.  **Bug Identification**: Successfully identified and documented **29 unique bugs** ranging from simple schema mismatches to critical privilege escalation vulnerabilities.
-3.  **Automation Framework**: Built a modular Pytest suite using `requests`. Implemented shared fixtures in `conftest.py` to handle `X-Roll-Number` and `X-User-ID` headers centrally.
+cd whitebox
+PYTHONPATH=code pytest -q tests
+PYTHONPATH=code pylint code/moneypoly/
+
+cd ../integration
+PYTHONPATH=.. pytest -q tests
+
+cd ../blackbox
+docker load -i ../quickcart_image.tar
+docker run -d -p 8080:8080 --name quickcart quickcart
+pytest -q tests
+docker stop quickcart
+docker rm quickcart
+```
+
+That is the most direct way to verify the whole assignment the same way a TA would inspect it.
 
 ---
+
+## Methodology Summary
+
+### White Box
+
+The MoneyPoly work focused on CFG coverage, edge-case coverage, and defect-driven regression tests. Each discovered logic error was fixed and then retested with a dedicated regression case.
+
+### Integration
+
+The StreetRace Manager work focused on module interaction, shared state, and end-to-end behavior across the 9-module design.
+
+### Black Box
+
+The QuickCart work focused on API behavior from the outside, including valid and invalid requests, security-relevant cases, and boundary conditions.
+
+---
+
+## Reports and Evidence
+
+- `whitebox/report.md` contains the white-box test table, bug log, and commit mapping
+- `integration/report.md` contains the integration testing evidence
+- `blackbox/report.md` contains the API testing findings and bug summary
+
+---
+
+## Troubleshooting
+
+- If Python cannot import `moneypoly`, make sure `PYTHONPATH=code` is set inside `whitebox/`.
+- If the integration tests cannot find modules, run them from `integration/` with `PYTHONPATH=..`.
+- If Docker says the `quickcart` container already exists, remove it before starting a new one.
+- If `pytest` or `pylint` is missing, install them into your active Python environment with `pip install pytest pylint requests`.
+
+---
+
 **Author**: 2024101088
