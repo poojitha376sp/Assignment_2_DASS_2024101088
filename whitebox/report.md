@@ -137,6 +137,8 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-48** | Tile Classification | Special, property, and blank tiles are classified correctly | **PASSED** |
 | **TC-49** | Deck Reshuffle | Reshuffling resets the index and preserves cards | **PASSED** |
 | **TC-50** | Group Owner Counts | Property group counts multiple owners correctly | **PASSED** |
+| **TC-51** | Group Payment Bankruptcy | Bankrupt opponents are removed after collect-from-all | **PASSED** (Fixed) |
+| **TC-52** | Birthday Bankruptcy | Bankrupt opponents are removed after birthday payments | **PASSED** (Fixed) |
 
 ### Errors & Logical Issues Corrected
 The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This section is kept short on purpose so it does not repeat the same information that is already shown in the test table and the commit log.
@@ -176,6 +178,8 @@ The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This se
 - **TC-48** checks that board tile classification handles special tiles, property tiles, and blank tiles correctly.
 - **TC-49** checks that reshuffling a deck resets the draw index and does not lose the deck contents.
 - **TC-50** checks that group owner counts handle more than one owner correctly.
+- **TC-51** checks that a player who goes bankrupt from a collect-from-all card is removed from the game.
+- **TC-52** checks the same bankruptcy cleanup for the birthday card path.
 
 ### New Results Summary
 - TC-22 to TC-26 did not reveal new code errors.
@@ -186,9 +190,10 @@ The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This se
 - TC-36 to TC-40 passed and mainly strengthened boundary coverage.
 - TC-41 to TC-45 passed and further strengthen helper-method coverage.
 - TC-46 to TC-50 passed and extend the helper/boundary coverage without exposing new defects.
+- TC-51 and TC-52 revealed a real defect in card-driven bankruptcy cleanup and were fixed in the code.
 
 ### Error Fix Log
-This section ties the discovered issues to the tests that exposed them. Only **Errors #1 to #11** are code defects. The later commit `0434be9` is a documentation update that adds this audit trail; it is **not** a separate code error.
+This section ties the discovered issues to the tests that exposed them. Only **Errors #1 to #12** are code defects. The later commit `0434be9` is a documentation update that adds this audit trail; it is **not** a separate code error.
 
 | Error | What Was Wrong | Main Test Evidence | Commit |
 | :--- | :--- | :--- | :--- |
@@ -203,10 +208,12 @@ This section ties the discovered issues to the tests that exposed them. Only **E
 | **Error #9** | Collect-from-all and birthday cards were ignored. | TC-18 / TC-19 | `4e335d8` - Error #9: Handle collect-from-all and birthday cards |
 | **Error #10** | Dice range, loan accounting, mortgage rollback, empty deck safety, and owner protection needed fixes. | TC-27 / TC-28 / TC-29 / TC-30 / TC-31 | `5f30671` - Error #10: Add branch coverage for jail trade and mortgage |
 | **Error #11** | Negative-value accounting, UI property access, and invalid trade/purchase inputs needed validation. | TC-32 / TC-33 / TC-34 / TC-35 | `8a5e028` - Error #11: Fix dice loan mortgage and ownership edge cases |
+| **Error #12** | Card payments did not remove players who went bankrupt from the game. | TC-51 / TC-52 | `pending` - Error #12: Handle bankrupt opponents from card payments |
 
 ### Commit Notes
 - The white-box work now has 11 total error fixes documented across the report.
-- The `Error #8` to `Error #11` items also exist as Git commits with the required format.
+- The white-box work now has 12 total error fixes documented across the report.
+- The `Error #8` to `Error #12` items also exist as Git commits with the required format, except the new Error #12 commit is still pending until saved.
 - No earlier report content was removed; this log only adds the missing audit trail.
 - Commit `0434be9` is a report-only update and should not be counted as `Error #12`.
 

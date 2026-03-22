@@ -279,12 +279,14 @@ class Game:
                     continue
                 other.deduct_money(value)
                 player.add_money(value)
+                self._check_bankruptcy(other)
         elif action == "birthday":
             for other in self.players:
                 if other is player:
                     continue
                 other.deduct_money(value)
                 player.add_money(value)
+                self._check_bankruptcy(other)
 
     def _handle_card_move_to(self, player, target):
         old = player.position
