@@ -182,6 +182,8 @@ The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This se
 - **TC-52** checks the same bankruptcy cleanup for the birthday card path.
 - **TC-53** checks that mortgaged properties stop monopoly double-rent from applying.
 - **TC-54** checks that double rent returns only after the whole group is free of mortgages.
+- **TC-55** checks that mortgaging a property reduces the bank's cash reserves.
+- **TC-56** checks that a rejected mortgage attempt leaves the bank unchanged.
 
 ### New Results Summary
 - TC-22 to TC-26 did not reveal new code errors.
@@ -194,9 +196,11 @@ The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This se
 - TC-46 to TC-50 passed and extend the helper/boundary coverage without exposing new defects.
 - TC-51 and TC-52 revealed a real defect in card-driven bankruptcy cleanup and were fixed in the code.
 - TC-53 and TC-54 revealed a real defect in monopoly rent handling and were fixed in the code.
+- TC-55 revealed a real defect in mortgage bank accounting and was fixed in the code.
+- TC-56 passed and strengthens the mortgage no-op branch.
 
 ### Error Fix Log
-This section ties the discovered issues to the tests that exposed them. Only **Errors #1 to #13** are code defects. The later commit `0434be9` is a documentation update that adds this audit trail; it is **not** a separate code error.
+This section ties the discovered issues to the tests that exposed them. Only **Errors #1 to #14** are code defects. The later commit `0434be9` is a documentation update that adds this audit trail; it is **not** a separate code error.
 
 | Error | What Was Wrong | Main Test Evidence | Commit |
 | :--- | :--- | :--- | :--- |
@@ -213,11 +217,13 @@ This section ties the discovered issues to the tests that exposed them. Only **E
 | **Error #11** | Negative-value accounting, UI property access, and invalid trade/purchase inputs needed validation. | TC-32 / TC-33 / TC-34 / TC-35 | `8a5e028` - Error #11: Fix dice loan mortgage and ownership edge cases |
 | **Error #12** | Card payments did not remove players who went bankrupt from the game. | TC-51 / TC-52 | `ef73b6a` - Error #12: Handle bankrupt opponents from card payments |
 | **Error #13** | Monopoly rent still doubled even when one property in the set was mortgaged. | TC-53 / TC-54 | `a1ed3f5` - Error #13: Block monopoly rent when any property is mortgaged |
+| **Error #14** | Mortgage payouts were not reducing bank reserves after the negative-collection safety change. | TC-55 | `pending` - Error #14: Pay out bank funds when mortgaging property |
 
 ### Commit Notes
-- The white-box work now has 13 total error fixes documented across the report.
+- The white-box work now has 14 total error fixes documented across the report.
 - The `Error #8` to `Error #12` items also exist as Git commits with the required format.
 - `Error #13` is documented here and has a matching Git commit.
+- `Error #14` is documented here and needs its commit recorded after the fix is saved.
 - No earlier report content was removed; this log only adds the missing audit trail.
 - Commit `0434be9` is a report-only update and should not be counted as `Error #12`.
 

@@ -170,7 +170,7 @@ class Game:
         if payout == 0:
             return False
         player.add_money(payout)
-        self.resources["bank"].collect(-payout)
+        self.resources["bank"].pay_out(payout)
         print(f"  {player.name} mortgaged {prop.name} and received ${payout}.")
         return True
 
