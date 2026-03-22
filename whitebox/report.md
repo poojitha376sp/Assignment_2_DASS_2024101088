@@ -139,32 +139,7 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-50** | Group Owner Counts | Property group counts multiple owners correctly | **PASSED** |
 
 ### Errors & Logical Issues Corrected
-#### **Error #1: Jail Fine Missing Deduction**
-Fixed by adding `player.deduct_money(JAIL_FINE)`.
-
-#### **Error #2: Pass Go Salary Logic**
-Trigger on any move passing position 0.
-
-#### **Error #3: Jail Escape via Doubles**
-Implemented dice roll check in `_handle_jail_turn`.
-
-#### **Error #4: Monopoly Logic (Any vs All)**
-Corrected to require full set for double rent.
-
-#### **Error #5: Missing Rent Transfer**
-Fixed in `pay_rent` to credit the owner.
-
-#### **Error #6: Early Elimination (Missing Liquidation)**
-Added `_check_bankruptcy` rescue loop allowing mortgages.
-
-#### **Error #7: Missing House Building (Nodes 48-52)**
-Implemented `_menu_build` and Choice 7 in `interactive_menu`. 
-
-#### **Error #8: Exact-Balance Purchase Blocked**
-Changed the buy check so a player can buy a property when their money is exactly the same as the price.
-
-#### **Error #9: Chance and Community Chest Group-Payment Cards Ignored**
-Added support for `collect_from_all` and `birthday` cards so money moves correctly between players.
+The code bugs fixed in Part 1 are summarized in the Error Fix Log below. This section is kept short on purpose so it does not repeat the same information that is already shown in the test table and the commit log.
 
 ### Why the New Tests Were Added
 - **TC-17** checks the edge case where a player has exactly enough money to buy a property. This matters because the code used to reject that case.
