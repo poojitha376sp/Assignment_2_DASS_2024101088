@@ -132,6 +132,11 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-43** | Net Worth | Mortgaged properties do not count toward net worth | **PASSED** |
 | **TC-44** | No Players | Empty game has no winner | **PASSED** |
 | **TC-45** | Board Ownership Lists | Owned and unowned property lists match board state | **PASSED** |
+| **TC-46** | Exact Go Landing | Landing exactly on Go awards salary | **PASSED** |
+| **TC-47** | Bank Overdraft | Bank refuses payouts above its balance | **PASSED** |
+| **TC-48** | Tile Classification | Special, property, and blank tiles are classified correctly | **PASSED** |
+| **TC-49** | Deck Reshuffle | Reshuffling resets the index and preserves cards | **PASSED** |
+| **TC-50** | Group Owner Counts | Property group counts multiple owners correctly | **PASSED** |
 
 ### Errors & Logical Issues Corrected
 #### **Error #1: Jail Fine Missing Deduction**
@@ -191,6 +196,11 @@ Added support for `collect_from_all` and `birthday` cards so money moves correct
 - **TC-43** checks that mortgaged property value is excluded from net worth.
 - **TC-44** checks that an empty game returns no winner instead of crashing.
 - **TC-45** checks that owned and unowned board listings stay in sync.
+- **TC-46** checks the exact-board-size movement edge case where the player lands directly on Go.
+- **TC-47** checks that the bank refuses payouts larger than its balance.
+- **TC-48** checks that board tile classification handles special tiles, property tiles, and blank tiles correctly.
+- **TC-49** checks that reshuffling a deck resets the draw index and does not lose the deck contents.
+- **TC-50** checks that group owner counts handle more than one owner correctly.
 
 ### New Results Summary
 - TC-22 to TC-26 did not reveal new code errors.
@@ -200,6 +210,7 @@ Added support for `collect_from_all` and `birthday` cards so money moves correct
 - TC-32 to TC-35 revealed real defects and were fixed in the code.
 - TC-36 to TC-40 passed and mainly strengthened boundary coverage.
 - TC-41 to TC-45 passed and further strengthen helper-method coverage.
+- TC-46 to TC-50 passed and extend the helper/boundary coverage without exposing new defects.
 
 ### Error Fix Log
 This section ties the discovered issues to the tests that exposed them. Only **Errors #1 to #11** are code defects. The later commit `0434be9` is a documentation update that adds this audit trail; it is **not** a separate code error.
