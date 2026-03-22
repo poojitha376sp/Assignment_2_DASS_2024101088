@@ -104,6 +104,10 @@ Achieved 100% statement and branch coverage of the 78-node CFG.
 | **TC-15** | **Super Workflow** | **Nodes 48-52 (Houses/Monopoly)**| **PASSED** |
 | **TC-16** | Special: Luxury Tax | Node 18b (Position 38) | **PASSED** |
 | **TC-17** | Purchase: Exact Balance | Buying is allowed when balance equals price | **PASSED** (Fixed) |
+| **TC-18** | Chance Card: Collect From All | Multi-player money transfer branch | **PASSED** (Fixed) |
+| **TC-19** | Community Chest: Birthday | Every opponent pays the active player | **PASSED** (Fixed) |
+| **TC-20** | Special: Free Parking | Landing on a harmless tile does nothing | **PASSED** |
+| **TC-21** | Property Ownership: Self-Land | No rent when landing on your own property | **PASSED** |
 
 ### Errors & Logical Issues Corrected
 #### **Error #1: Jail Fine Missing Deduction**
@@ -130,8 +134,15 @@ Implemented `_menu_build` and Choice 7 in `interactive_menu`.
 #### **Error #8: Exact-Balance Purchase Blocked**
 Changed the buy check so a player can buy a property when their money is exactly the same as the price.
 
-### Why the New Test Was Added
+#### **Error #9: Chance and Community Chest Group-Payment Cards Ignored**
+Added support for `collect_from_all` and `birthday` cards so money moves correctly between players.
+
+### Why the New Tests Were Added
 - **TC-17** checks the edge case where a player has exactly enough money to buy a property. This matters because the code used to reject that case.
+- **TC-18** checks the Chance card that makes one player collect money from everyone else. This covers a branch that was missing before.
+- **TC-19** checks the Community Chest birthday card. It is similar to TC-18, but it follows a different card path, so it needs its own test.
+- **TC-20** checks a safe tile that should not change the game state. This confirms the code does nothing when it should do nothing.
+- **TC-21** checks that landing on your own property does not charge rent. This protects the self-ownership branch.
 
 ---
 

@@ -266,6 +266,18 @@ class Game:
             player.jail_info["cards"] += 1
         elif action == "move_to":
             self._handle_card_move_to(player, value)
+        elif action == "collect_from_all":
+            for other in self.players:
+                if other is player:
+                    continue
+                other.deduct_money(value)
+                player.add_money(value)
+        elif action == "birthday":
+            for other in self.players:
+                if other is player:
+                    continue
+                other.deduct_money(value)
+                player.add_money(value)
 
     def _handle_card_move_to(self, player, target):
         old = player.position
