@@ -140,7 +140,7 @@ The following **65 test cases** validate how different modules interact with one
 
 | ID | Scenario | Modules | Expected | Actual | Errors |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **G01** | Mechanic repairs damaged car | Crew, Inv → Mission | Accepted, car fixed | ✅ Accepted, is_damaged=False | None |
+| **G01** | Mechanic repairs damaged car | Crew, Inv → Mission | Accepted, car fixed | ✅ Accepted, is_damaged=False | Fixed: Missing Inventory dependency in MissionModule constructor during initial integration. |
 | **G02** | Repair an undamaged car | Inv → Mission | Rejected: "not damaged" | ✅ Rejected | None |
 | **G03** | Repair without specifying car name | Mission | Rejected: "Must specify" | ✅ Rejected | None |
 | **G04** | Driver tries to repair damaged car | Crew → Mission | Rejected: needs mechanic | ✅ Rejected | None |
@@ -194,7 +194,7 @@ The following **65 test cases** validate how different modules interact with one
 | **J05** | Tuning depletes cash, winning restores it | Crew, Inv, Tuning, Race, Results | Cash = initial-500+2000 | ✅ Correct | None |
 | **J06** | 3 crew, 3 parallel missions | Reg, Crew, Mission | 3 missions active | ✅ len=3 | None |
 | **J07** | Crash → Repair → Race again (full cycle) | All core modules | Car reusable after repair | ✅ 2nd race succeeded | None |
-| **J08** | Main controller: run_race_sequence() | Main, Race, Res, Sponsor | Cash=$13K, trophy earned | ✅ Correct | None |
+| **J08** | Main controller: run_race_sequence() | Main, Race, Res, Sponsor | Cash=$13K, trophy earned | ✅ Correct | Fixed: Parameter name mismatch (`prize` vs `prize_money`) in `ResultsModule.finalize_race` call. |
 | **J09** | Main controller: perform_tuning() | Main, Tuning, Crew, Inv | Upgrade succeeded | ✅ Correct | None |
 | **J10** | Main controller: start_mission() | Main, Mission, Crew | Mission assigned | ✅ Correct | None |
 
@@ -210,7 +210,12 @@ The following **65 test cases** validate how different modules interact with one
 ---
 
 ## 2.4 Testing Results Summary
-All **65 Integration Test Cases** passed 100% using `pytest`. No logical issues or integration errors were found. Every module interaction from the Call Graph has been verified.
+All **65 Integration Test Cases** passed 100% after resolving initial integration bugs. The testing process was instrumental in catching dependency gaps and naming inconsistencies across module boundaries.
+
+### **Bugs Detected & Fixed During Integration:**
+1.  **Dependency Injection Error**: `MissionModule` was initially initialized without the `InventoryModule` reference, causing `Repair` missions to fail with an `AttributeError`.
+2.  **Interface Mismatch**: The `StreetRaceManager.run_race_sequence` was passing `prize` while `ResultsModule` expected `prize_money`. This was caught during the first end-to-end integration test.
+3.  **State Synchronization**: Car damage state was initially not resetting to `False` after a successful `Repair` mission; logic was updated to call `set_damage(False)` upon mission completion.
 
 ```
 pytest integration/tests/test_integration.py -v
