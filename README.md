@@ -12,9 +12,9 @@ This repository contains the complete submission for Assignment 2:
 
 ## Repository Layout
 
-- `whitebox/` - MoneyPoly source, tests, report, and diagrams
-- `integration/` - StreetRace Manager source, tests, and report
-- `blackbox/` - QuickCart API tests and report
+- `whitebox/` - MoneyPoly source, tests, WhiteBox_report.pdf, and diagrams
+- `integration/` - StreetRace Manager source, tests, and Integration_report.pdf
+- `blackbox/` - QuickCart API tests and BlackBox_report.pdf
 - `README.md` - this top-level run guide for the whole assignment
 
 ---
@@ -61,9 +61,9 @@ This order is useful because the white-box part is the most code-heavy and gives
 
 This part lives in `whitebox/` and contains:
 
-- `whitebox/code/moneypoly/` - the MoneyPoly game engine
+- `whitebox/code/moneypoly/` - the MoneyPoly game engine (also in the clouds in the CFG, it is just the explanation of that node that it contains.)
 - `whitebox/tests/` - pytest-based white-box test batches
-- `whitebox/report.md` - the detailed report with test cases, errors, commits, and explanations
+- `whitebox/WhiteBox_report.pdf` - the detailed report with test cases, errors, commits, and explanations
 
 ### 1. Enter the whitebox folder
 
@@ -160,7 +160,7 @@ The integration work verifies that cross-module state updates stay consistent, f
 - missions depending on the correct crew roles
 - trophies and sponsorship logic staying in sync with race events
 
-The matching documentation for this part is in `integration/report.md`.
+The matching documentation for this part is in `integration/Integration_report.pdf`.
 
 ---
 
@@ -203,7 +203,7 @@ The API suite checks:
 - authorization and privilege checks
 - schema correctness and error responses
 
-The matching documentation for this part is in `blackbox/report.md`.
+The matching documentation for this part is in `blackbox/BlackBox_report.pdf`.
 
 ---
 
@@ -251,9 +251,9 @@ The QuickCart work focused on API behavior from the outside, including valid and
 
 ## Reports and Evidence
 
-- `whitebox/report.md` contains the white-box test table, bug log, and commit mapping
-- `integration/report.md` contains the integration testing evidence
-- `blackbox/report.md` contains the API testing findings and bug summary
+- `whitebox/WhiteBox_report.pdf` contains the white-box test table, bug log, and commit mapping
+- `integration/Integration_report.pdf` contains the integration testing evidence
+- `blackbox/BlackBox_report.pdf` contains the API testing findings and bug summary
 
 ---
 

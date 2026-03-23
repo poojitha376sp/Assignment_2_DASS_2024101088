@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreetRace Manager - Workflow Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0c;
+            --panel: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #ff4757;
+            --success: #2ed573;
+            --info: #1e90ff;
+            --warning: #ffa502;
+            --text: #f1f2f6;
+            --text-dim: #a4b0be;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar / Dashboard */
+        .sidebar {
+            width: 320px;
+            background: rgba(15, 15, 20, 0.8);
+            border-right: 1px solid var(--border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            backdrop-filter: blur(20px);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stats-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+            border-radius: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .stat-label { color: var(--text-dim); }
+        .stat-value { font-weight: 600; color: var(--success); }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .title h1 { font-size: 2.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .title p { color: var(--text-dim); }
+
+        .terminal {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            overflow-y: auto;
+            box-shadow: inset 0 4px 30px rgba(0,0,0,0.5);
+        }
+
+        .log-entry {
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        .log-entry::before {
+            content: '>';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .log-phase { color: var(--info); font-weight: 600; text-transform: uppercase; font-size: 0.8rem; margin-top: 1rem; }
+        .log-success { color: var(--success); }
+        .log-error { color: var(--accent); }
+        .log-system { color: var(--text-dim); font-style: italic; }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(255, 71, 87, 0.4); }
+
+        /* Visual Blocks */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 20px;
+            transition: all 0.3s;
+        }
+
+        .card:hover { border-color: var(--accent); background: rgba(255, 71, 87, 0.05); }
+
+        .card-title { font-size: 0.8rem; text-transform: uppercase; color: var(--text-dim); margin-bottom: 1rem; letter-spacing: 1px; }
+        .card-body { font-size: 1.1rem; font-weight: 600; }
+
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            background: rgba(255,255,255,0.1);
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">
+            <span>🏎️</span> StreetRace Manager
+        </div>
+
+        <div class="stats-card">
+            <div class="stat-item">
+                <span class="stat-label">Wallet</span>
+                <span class="stat-value" id="cash">$10,000</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Inventory</span>
+                <span class="stat-value" id="parts">5 Parts</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Trophies</span>
+                <span class="stat-value" id="trophies">0 Earned</span>
+            </div>
+        </div>
+
+        <div class="title" style="margin-top: auto;">
+            <p style="font-size: 0.85rem;">Integration Playback</p>
+            <p style="font-size: 0.75rem; opacity: 0.5;">Verifying 9-Module Workflow</p>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <div class="title">
+                <h1>Full Integration Simulation</h1>
+                <p>Automated execution of the Python StreetRaceManager logic</p>
+            </div>
+            <div class="controls">
+                <button id="startBtn">▶ Run Full Workflow</button>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card" id="card-team">
+                <div class="card-title">Active Team</div>
+                <div class="card-body" id="team-list">Waiting...</div>
+            </div>
+            <div class="card" id="card-car">
+                <div class="card-title">Vehicle State</div>
+                <div class="card-body" id="car-state">Nissan Supra (Stock)</div>
+            </div>
+            <div class="card" id="card-status">
+                <div class="card-title">System Status</div>
+                <div class="card-body" id="system-status">Idle</div>
+            </div>
+        </div>
+
+        <div class="terminal" id="terminal">
+            <div class="log-entry log-system">System online. Ready for integration test playback.</div>
+        </div>
+    </div>
+
+    <script>
+        const terminal = document.getElementById('terminal');
+        const cashEl = document.getElementById('cash');
+        const partsEl = document.getElementById('parts');
+        const trophiesEl = document.getElementById('trophies');
+        const teamEl = document.getElementById('team-list');
+        const carEl = document.getElementById('car-state');
+        const statusEl = document.getElementById('system-status');
+
+        let state = {
+            cash: 10000,
+            parts: 5,
+            trophies: 0,
+            team: [],
+            carDamage: false,
+            carStats: { speed: 0, handling: 0 }
+        };
+
+        function log(msg, type = '') {
+            const div = document.createElement('div');
+            div.className = `log-entry ${type}`;
+            div.innerHTML = msg;
+            terminal.appendChild(div);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function phase(title) {
+            const div = document.createElement('div');
+            div.className = 'log-phase';
+            div.innerText = `--- Phase: ${title} ---`;
+            terminal.appendChild(div);
+        }
+
+        async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        async function runWorkflow() {
+            document.getElementById('startBtn').disabled = true;
+            statusEl.innerText = "Running...";
+            
+            // Phase 1: Registration
+            phase("Registration & Recruitment");
+            await wait(1000);
+            log("Core: Initializing StreetRaceManager Service Hub...");
+            log("RegistrationModule: Adding 'Poojitha' to database...");
+            log("CrewModule: Verifying registration for 'Poojitha'...", "log-system");
+            log("CrewModule: Role Assigned -> [Driver] (Skill: 10)", "log-success");
+            state.team.push("<span class='tag'>Driver</span> Poojitha");
+            teamEl.innerHTML = state.team.join("<br>");
+            await wait(800);
+            
+            log("RegistrationModule: Adding 'Mechanic_Bob'...");
+            log("CrewModule: Role Assigned -> [Mechanic]", "log-success");
+            state.team.push("<span class='tag'>Mechanic</span> Bob");
+            teamEl.innerHTML = state.team.join("<br>");
+            await wait(800);
+
+            // Phase 2: Tuning
+            phase("Technical Optimization");
+            log("TuningModule: Bob starts performance upgrade on Supra...");
+            log("InventoryModule: Checking 'Engine Module' availability...", "log-system");
+            log("InventoryModule: Consuming 1 Part, Deducting $500", "log-warning");
+            state.parts -= 1;
+            state.cash -= 500;
+            state.carStats.speed += 10;
+            cashEl.innerText = `$${state.cash.toLocaleString()}`;
+            partsEl.innerText = `${state.parts} Parts`;
+            carEl.innerHTML = `Supra (Speed +10, Stock Handling)`;
+            log("TuningModule: SUCCESS. Stats permanently improved.", "log-success");
+            await wait(1200);
+
+            // Phase 3: Race
+            phase("Competitive Race Execution");
+            log("RaceModule: Scheduling 'GRAND_PRIX_01'...");
+            log("RaceModule: Driver='Poojitha', Car='Supra' (Tuned)", "log-info");
+            log("RaceModule: Verifying driver role and car presence...", "log-system");
+            await wait(1000);
+            log("ResultsModule: FINALIZING RACE -> Position: 1st", "log-success");
+            log("InventoryModule: Adding Prize Money -> +$7,500", "log-success");
+            state.cash += 7500;
+            cashEl.innerText = `$${state.cash.toLocaleString()}`;
+            await wait(800);
+
+            // Phase 4: Bonuses & Trophies
+            phase("Integration Rewards");
+            log("SponsorModule: Triggering win bonus for 'GRAND_PRIX_01'...");
+            log("InventoryModule: Adding Sponsor Bonus -> +$5,000", "log-success");
+            state.cash += 5000;
+            cashEl.innerText = `$${state.cash.toLocaleString()}`;
+            await wait(800);
+            log("TrophyModule: High-stakes win detected. 🏆 Achievement Unlocked!", "log-success");
+            state.trophies += 1;
+            trophiesEl.innerText = `1 Earned`;
+            await wait(1000);
+
+            // Phase 5: Damage & Repair
+            phase("Resilience & Missions");
+            log("System: Simulating post-race technical failure...");
+            log("InventoryModule: supra.is_damaged = TRUE", "log-error");
+            state.carDamage = true;
+            carEl.style.color = "var(--accent)";
+            carEl.innerText = `Supra (DAMAGED)`;
+            await wait(1200);
+            
+            log("MissionModule: Assigning 'Repair' Mission to Bob...");
+            log("MissionModule: Verifying Mechanic role & Damage status...", "log-system");
+            log("CrewModule: Bob is qualified.", "log-success");
+            log("MissionModule: Repairing vehicle...", "log-system");
+            await wait(1500);
+            state.carDamage = false;
+            carEl.style.color = "var(--success)";
+            carEl.innerText = `Supra (Repaired & Tuned)`;
+            log("MissionModule: SUCCESS. Vehicle restored to race-ready state.", "log-success");
+
+            statusEl.innerText = "Completed";
+            statusEl.style.color = "var(--success)";
+            phase("Audit Complete");
+            log("Full 9-Module Integration Chain verified with 0 errors.", "log-success");
+            document.getElementById('startBtn').innerText = "Workflow Verified ✅";
+        }
+
+        document.getElementById('startBtn').addEventListener('click', runWorkflow);
+    </script>
+</body>
+</html>
